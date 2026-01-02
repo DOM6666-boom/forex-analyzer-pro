@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis History - Pro Forex Analyzer</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%2300d4ff'/><stop offset='100%25' style='stop-color:%2300ff88'/></linearGradient></defs><circle cx='50' cy='50' r='45' fill='%230a0a1a' stroke='url(%23g)' stroke-width='3'/><path d='M25 60 L40 40 L55 50 L75 25' stroke='url(%23g)' stroke-width='4' fill='none' stroke-linecap='round' stroke-linejoin='round'/><circle cx='75' cy='25' r='5' fill='%2300ff88'/></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a0a1a 0%, #0d1117 50%, #0a1628 100%);
+            min-height: 100vh;
+            color: #e6edf3;
+            padding: 20px;
+        }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #8b949e;
+            text-decoration: none;
+            margin-bottom: 30px;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+        .back-btn:hover { color: #00d4ff; }
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        .page-title {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #00d4ff, #00ff88);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .stats-badge {
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            color: #00d4ff;
+        }
+        .history-list { display: flex; flex-direction: column; gap: 15px; }
+        .history-item {
+            background: rgba(22, 27, 34, 0.9);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid rgba(48, 54, 61, 0.8);
+            transition: all 0.3s ease;
+        }
+        .history-item:hover {
+            border-color: rgba(0, 212, 255, 0.3);
+            transform: translateX(5px);
+        }
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .history-symbol {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #e6edf3;
+        }
+        .history-date {
+            font-size: 0.8rem;
+            color: #6e7681;
+        }
+        .history-meta {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+        .meta-item {
+            font-size: 0.85rem;
+            color: #8b949e;
+        }
+        .meta-item span { color: #e6edf3; font-weight: 600; }
+        .signal-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .signal-badge.buy { background: rgba(0, 255, 136, 0.2); color: #00ff88; }
+        .signal-badge.sell { background: rgba(255, 71, 87, 0.2); color: #ff4757; }
+        .signal-badge.neutral { background: rgba(139, 148, 158, 0.2); color: #8b949e; }
+        .confidence-bar {
+            height: 4px;
+            background: rgba(48, 54, 61, 0.5);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00d4ff, #00ff88);
+            border-radius: 2px;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6e7681;
+        }
+        .empty-state h3 { margin-bottom: 10px; color: #8b949e; }
+        .empty-state a {
+            color: #00d4ff;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-btn">← Back to Analyzer</a>
+        
+        <div class="page-header">
+            <h1 class="page-title">📜 Analysis History</h1>
+            <div class="stats-badge">
+                Total: {{ user.total_analyses or 0 }} analyses
+            </div>
+        </div>
+        
+        <div class="history-list">
+            {% if history %}
+                {% for item in history %}
+                <div class="history-item">
+                    <div class="history-header">
+                        <div>
+                            <span class="history-symbol">{{ item.symbol or 'Unknown' }}</span>
+                            <span class="signal-badge {{ item.signal_type|lower if item.signal_type else 'neutral' }}">
+                                {{ item.signal_type or 'N/A' }}
+                            </span>
+                        </div>
+                        <span class="history-date">{{ item.created_at[:16] if item.created_at else '' }}</span>
+                    </div>
+                    <div class="history-meta">
+                        <div class="meta-item">Timeframe: <span>{{ item.timeframe or 'N/A' }}</span></div>
+                        <div class="meta-item">Confidence: <span>{{ item.confidence or 0 }}%</span></div>
+                        {% if item.entry_price %}
+                        <div class="meta-item">Entry: <span>{{ item.entry_price }}</span></div>
+                        {% endif %}
+                        {% if item.stop_loss %}
+                        <div class="meta-item">SL: <span>{{ item.stop_loss }}</span></div>
+                        {% endif %}
+                        {% if item.take_profit %}
+                        <div class="meta-item">TP: <span>{{ item.take_profit }}</span></div>
+                        {% endif %}
+                    </div>
+                    <div class="confidence-bar">
+                        <div class="confidence-fill" style="width: {{ item.confidence or 0 }}%"></div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <h3>No analysis history yet</h3>
+                    <p>Start analyzing charts to build your history!</p>
+                    <p><a href="/">→ Go to Analyzer</a></p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

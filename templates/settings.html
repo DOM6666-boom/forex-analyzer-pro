@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Pro Forex Analyzer</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%2300d4ff'/><stop offset='100%25' style='stop-color:%2300ff88'/></linearGradient></defs><circle cx='50' cy='50' r='45' fill='%230a0a1a' stroke='url(%23g)' stroke-width='3'/><path d='M25 60 L40 40 L55 50 L75 25' stroke='url(%23g)' stroke-width='4' fill='none' stroke-linecap='round' stroke-linejoin='round'/><circle cx='75' cy='25' r='5' fill='%2300ff88'/></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a0a1a 0%, #0d1117 50%, #0a1628 100%);
+            min-height: 100vh;
+            color: #e6edf3;
+            padding: 20px;
+        }
+        .container { max-width: 800px; margin: 0 auto; }
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #8b949e;
+            text-decoration: none;
+            margin-bottom: 30px;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+        .back-btn:hover { color: #00d4ff; }
+        .page-title {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #00d4ff, #00ff88);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 30px;
+        }
+        .settings-section {
+            background: rgba(22, 27, 34, 0.9);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(48, 54, 61, 0.8);
+            margin-bottom: 20px;
+        }
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #e6edf3;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .profile-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid #00d4ff;
+        }
+        .profile-details h3 {
+            font-size: 1.3rem;
+            margin-bottom: 5px;
+        }
+        .profile-details p {
+            color: #8b949e;
+            font-size: 0.9rem;
+        }
+        .tier-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-top: 8px;
+        }
+        .tier-badge.free { background: rgba(139, 148, 158, 0.2); color: #8b949e; }
+        .tier-badge.pro { background: rgba(0, 212, 255, 0.2); color: #00d4ff; }
+        .tier-badge.premium { background: rgba(255, 215, 0, 0.2); color: #ffd700; }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+        .stat-card {
+            background: rgba(13, 17, 23, 0.5);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #00d4ff;
+        }
+        .stat-label {
+            font-size: 0.8rem;
+            color: #8b949e;
+            margin-top: 5px;
+        }
+        .usage-bar {
+            height: 8px;
+            background: rgba(48, 54, 61, 0.5);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+        .usage-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00d4ff, #00ff88);
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+        .usage-text {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: #8b949e;
+        }
+        .action-btn {
+            display: inline-block;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+            margin-top: 15px;
+        }
+        .action-btn.primary {
+            background: linear-gradient(135deg, #00d4ff, #00ff88);
+            color: #0a0a1a;
+        }
+        .action-btn.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
+        }
+        .action-btn.danger {
+            background: rgba(255, 71, 87, 0.1);
+            border: 1px solid rgba(255, 71, 87, 0.3);
+            color: #ff4757;
+        }
+        .action-btn.danger:hover {
+            background: rgba(255, 71, 87, 0.2);
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(48, 54, 61, 0.5);
+        }
+        .info-row:last-child { border-bottom: none; }
+        .info-label { color: #8b949e; }
+        .info-value { color: #e6edf3; font-weight: 500; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-btn">← Back to Analyzer</a>
+        <h1 class="page-title">⚙️ Settings</h1>
+        
+        <!-- Profile Section -->
+        <div class="settings-section">
+            <div class="section-title">👤 Profile</div>
+            <div class="profile-info">
+                <img src="{{ user.picture or 'https://ui-avatars.com/api/?name=' + (user.name or user.email)|urlencode + '&background=00d4ff&color=0a0a1a&size=80' }}" 
+                     alt="Avatar" class="profile-avatar">
+                <div class="profile-details">
+                    <h3>{{ user.name or user.email.split('@')[0] }}</h3>
+                    <p>{{ user.email }}</p>
+                    <span class="tier-badge {{ user.tier }}">
+                        {% if user.tier == 'premium' %}👑 PREMIUM
+                        {% elif user.tier == 'pro' %}⭐ PRO
+                        {% else %}FREE{% endif %}
+                    </span>
+                </div>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Login Method</span>
+                <span class="info-value">{{ user.provider|capitalize if user.provider else 'Email' }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Member Since</span>
+                <span class="info-value">{{ user.created_at[:10] if user.created_at else 'N/A' }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Last Login</span>
+                <span class="info-value">{{ user.last_login[:16] if user.last_login else 'N/A' }}</span>
+            </div>
+        </div>
+        
+        <!-- Usage Section -->
+        <div class="settings-section">
+            <div class="section-title">📊 Usage</div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">{{ tier_info.analyses_today if tier_info else 0 }}</div>
+                    <div class="stat-label">Today</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{ tier_info.analyses_remaining if tier_info else 5 }}</div>
+                    <div class="stat-label">Remaining</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{ user.total_analyses or 0 }}</div>
+                    <div class="stat-label">Total</div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 25px;">
+                <div class="usage-text">
+                    <span>Daily Usage</span>
+                    <span>{{ tier_info.analyses_today if tier_info else 0 }} / {{ tier_info.limits.analyses_per_day if tier_info else 5 }}</span>
+                </div>
+                {% set usage_percent = ((tier_info.analyses_today or 0) / (tier_info.limits.analyses_per_day or 5) * 100) if tier_info else 0 %}
+                <div class="usage-bar">
+                    <div class="usage-fill" style="width: {{ usage_percent|int }}%"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Subscription Section -->
+        <div class="settings-section">
+            <div class="section-title">💎 Subscription</div>
+            <p style="color: #8b949e; margin-bottom: 15px;">
+                {% if user.tier == 'premium' %}
+                    You have unlimited access to all features!
+                {% elif user.tier == 'pro' %}
+                    You have Pro access with 50 analyses per day.
+                {% else %}
+                    Upgrade to unlock more analyses and premium features.
+                {% endif %}
+            </p>
+            <a href="/pricing" class="action-btn primary">
+                {% if user.tier == 'free' %}Upgrade Plan{% else %}Manage Subscription{% endif %}
+            </a>
+        </div>
+        
+        <!-- Account Actions -->
+        <div class="settings-section">
+            <div class="section-title">🔐 Account</div>
+            <a href="/auth/logout" class="action-btn danger">Logout</a>
+        </div>
+    </div>
+</body>
+</html>

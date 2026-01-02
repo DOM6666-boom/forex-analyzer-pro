@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Successful - Pro Forex Analyzer</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%2300d4ff'/><stop offset='100%25' style='stop-color:%2300ff88'/></linearGradient></defs><circle cx='50' cy='50' r='45' fill='%230a0a1a' stroke='url(%23g)' stroke-width='3'/><path d='M25 60 L40 40 L55 50 L75 25' stroke='url(%23g)' stroke-width='4' fill='none' stroke-linecap='round' stroke-linejoin='round'/><circle cx='75' cy='25' r='5' fill='%2300ff88'/></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a0a1a 0%, #0d1117 50%, #0a1628 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #e6edf3;
+        }
+        .success-container {
+            text-align: center;
+            padding: 40px;
+            max-width: 500px;
+        }
+        .success-icon {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #00d4ff, #00ff88);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            font-size: 60px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 212, 255, 0.4); }
+            50% { transform: scale(1.05); box-shadow: 0 0 30px 10px rgba(0, 212, 255, 0.2); }
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #00d4ff, #00ff88);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .tier-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            background: rgba(0, 212, 255, 0.2);
+            border: 1px solid #00d4ff;
+            border-radius: 20px;
+            color: #00d4ff;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+        .tier-badge.premium {
+            background: rgba(255, 215, 0, 0.2);
+            border-color: #ffd700;
+            color: #ffd700;
+        }
+        p {
+            color: #8b949e;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        .features {
+            background: rgba(22, 27, 34, 0.9);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+        .feature {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(48, 54, 61, 0.5);
+        }
+        .feature:last-child { border-bottom: none; }
+        .feature-icon { font-size: 1.3rem; }
+        .feature-text { color: #e6edf3; }
+        .btn {
+            display: inline-block;
+            padding: 14px 30px;
+            background: linear-gradient(135deg, #00d4ff, #00ff88);
+            color: #0a0a1a;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0, 212, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="success-container">
+        <div class="success-icon">✓</div>
+        <h1>Payment Successful!</h1>
+        <div class="tier-badge {{ 'premium' if tier == 'premium' else '' }}">
+            {{ '👑 PREMIUM' if tier == 'premium' else '⭐ PRO' }} Member
+        </div>
+        <p>Welcome to {{ 'Premium' if tier == 'premium' else 'Pro' }}, {{ user.name or user.email.split('@')[0] }}! Your account has been upgraded and you now have access to all {{ 'Premium' if tier == 'premium' else 'Pro' }} features.</p>
+        
+        <div class="features">
+            {% if tier == 'premium' %}
+            <div class="feature">
+                <span class="feature-icon">♾️</span>
+                <span class="feature-text">Unlimited analyses per day</span>
+            </div>
+            <div class="feature">
+                <span class="feature-icon">📊</span>
+                <span class="feature-text">Multi-timeframe analysis</span>
+            </div>
+            <div class="feature">
+                <span class="feature-icon">🚀</span>
+                <span class="feature-text">Priority AI processing</span>
+            </div>
+            <div class="feature">
+                <span class="feature-icon">📄</span>
+                <span class="feature-text">PDF export</span>
+            </div>
+            {% else %}
+            <div class="feature">
+                <span class="feature-icon">📊</span>
+                <span class="feature-text">50 analyses per day</span>
+            </div>
+            <div class="feature">
+                <span class="feature-icon">📈</span>
+                <span class="feature-text">Multi-timeframe analysis</span>
+            </div>
+            <div class="feature">
+                <span class="feature-icon">📄</span>
+                <span class="feature-text">PDF export</span>
+            </div>
+            {% endif %}
+        </div>
+        
+        <a href="/" class="btn">Start Analyzing →</a>
+    </div>
+</body>
+</html>

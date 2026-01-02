@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing - Pro Forex Analyzer</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%2300d4ff'/><stop offset='100%25' style='stop-color:%2300ff88'/></linearGradient></defs><circle cx='50' cy='50' r='45' fill='%230a0a1a' stroke='url(%23g)' stroke-width='3'/><path d='M25 60 L40 40 L55 50 L75 25' stroke='url(%23g)' stroke-width='4' fill='none' stroke-linecap='round' stroke-linejoin='round'/><circle cx='75' cy='25' r='5' fill='%2300ff88'/></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a0a1a 0%, #0d1117 50%, #0a1628 100%);
+            min-height: 100vh;
+            color: #e6edf3;
+            padding: 20px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #8b949e;
+            text-decoration: none;
+            margin-bottom: 30px;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+        .back-btn:hover { color: #00d4ff; }
+        .page-title {
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #00d4ff, #00ff88);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .page-subtitle {
+            text-align: center;
+            color: #8b949e;
+            margin-bottom: 50px;
+            font-size: 1.1rem;
+        }
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+        .pricing-card {
+            background: rgba(22, 27, 34, 0.9);
+            border-radius: 24px;
+            padding: 35px;
+            border: 1px solid rgba(48, 54, 61, 0.8);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        .pricing-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+        }
+        .pricing-card.popular {
+            border-color: #00d4ff;
+            box-shadow: 0 0 40px rgba(0, 212, 255, 0.2);
+        }
+        .popular-badge {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #00d4ff, #00ff88);
+            color: #0a0a1a;
+            padding: 6px 20px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .tier-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #e6edf3;
+            margin-bottom: 10px;
+        }
+        .tier-name.premium {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .tier-price {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #00d4ff;
+            margin-bottom: 25px;
+        }
+        .tier-price span {
+            font-size: 1rem;
+            color: #8b949e;
+            font-weight: 400;
+        }
+        .tier-features {
+            list-style: none;
+            margin-bottom: 30px;
+        }
+        .tier-features li {
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(48, 54, 61, 0.5);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.95rem;
+        }
+        .tier-features .check { color: #00ff88; }
+        .tier-features .x { color: #6e7681; }
+        .tier-btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            background: rgba(48, 54, 61, 0.5);
+            color: #8b949e;
+        }
+        .tier-btn.upgrade {
+            background: linear-gradient(135deg, #00d4ff, #00ff88);
+            color: #0a0a1a;
+        }
+        .tier-btn.upgrade:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
+        }
+        .tier-btn.premium-btn {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+        }
+        .tier-btn.current {
+            background: rgba(0, 212, 255, 0.1);
+            color: #00d4ff;
+            border: 1px solid #00d4ff;
+        }
+        .tier-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        .faq-section {
+            background: rgba(22, 27, 34, 0.5);
+            border-radius: 20px;
+            padding: 40px;
+            margin-top: 30px;
+        }
+        .faq-section h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #e6edf3;
+        }
+        .faq-item {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(48, 54, 61, 0.5);
+        }
+        .faq-q {
+            font-weight: 600;
+            color: #00d4ff;
+            margin-bottom: 8px;
+        }
+        .faq-a { color: #8b949e; line-height: 1.6; }
+        .alert {
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .alert.warning {
+            background: rgba(255, 193, 7, 0.15);
+            border: 1px solid rgba(255, 193, 7, 0.4);
+            color: #ffc107;
+        }
+        .alert.error {
+            background: rgba(248, 81, 73, 0.15);
+            border: 1px solid rgba(248, 81, 73, 0.4);
+            color: #ff6b81;
+        }
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid transparent;
+            border-top-color: currentColor;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-btn">← Back to Analyzer</a>
+        <h1 class="page-title">Choose Your Plan</h1>
+        <p class="page-subtitle">Unlock the full power of institutional-grade AI trading analysis</p>
+        
+        {% if request.args.get('canceled') %}
+        <div class="alert warning">Payment was canceled. You can try again when you're ready.</div>
+        {% endif %}
+        
+        <div id="stripeAlert" class="alert warning" style="display: none;">
+            ⚠️ Payment system is being configured. Contact admin for manual upgrade.
+        </div>
+        
+        <div class="pricing-grid">
+            <!-- Free Tier -->
+            <div class="pricing-card">
+                <div class="tier-name">Free</div>
+                <div class="tier-price">$0<span>/month</span></div>
+                <ul class="tier-features">
+                    <li><span class="check">✓</span> 5 analyses per day</li>
+                    <li><span class="check">✓</span> 744 technical concepts</li>
+                    <li><span class="check">✓</span> AI-powered signals</li>
+                    <li><span class="x">✗</span> Multi-timeframe analysis</li>
+                    <li><span class="x">✗</span> PDF export</li>
+                    <li><span class="x">✗</span> Priority AI processing</li>
+                </ul>
+                {% if user and user.tier == 'free' %}
+                <button class="tier-btn current">Current Plan</button>
+                {% else %}
+                <a href="/login" class="tier-btn">Get Started</a>
+                {% endif %}
+            </div>
+            
+            <!-- Pro Tier -->
+            <div class="pricing-card popular">
+                <div class="popular-badge">Most Popular</div>
+                <div class="tier-name">Pro</div>
+                <div class="tier-price">$19.99<span>/month</span></div>
+                <ul class="tier-features">
+                    <li><span class="check">✓</span> 50 analyses per day</li>
+                    <li><span class="check">✓</span> 744 technical concepts</li>
+                    <li><span class="check">✓</span> AI-powered signals</li>
+                    <li><span class="check">✓</span> Multi-timeframe analysis</li>
+                    <li><span class="check">✓</span> PDF export</li>
+                    <li><span class="x">✗</span> Priority AI processing</li>
+                </ul>
+                {% if user and user.tier == 'pro' %}
+                <button class="tier-btn current">Current Plan</button>
+                {% elif user and user.tier == 'premium' %}
+                <button class="tier-btn" disabled>Included in Premium</button>
+                {% elif user %}
+                <button class="tier-btn upgrade" id="proBtn" onclick="checkout('pro')">
+                    Upgrade to Pro
+                </button>
+                {% else %}
+                <a href="/login" class="tier-btn upgrade">Login to Upgrade</a>
+                {% endif %}
+            </div>
+            
+            <!-- Premium Tier -->
+            <div class="pricing-card">
+                <div class="tier-name premium">Premium</div>
+                <div class="tier-price">$49.99<span>/month</span></div>
+                <ul class="tier-features">
+                    <li><span class="check">✓</span> Unlimited analyses</li>
+                    <li><span class="check">✓</span> 744 technical concepts</li>
+                    <li><span class="check">✓</span> AI-powered signals</li>
+                    <li><span class="check">✓</span> Multi-timeframe analysis</li>
+                    <li><span class="check">✓</span> PDF export</li>
+                    <li><span class="check">✓</span> Priority AI processing</li>
+                </ul>
+                {% if user and user.tier == 'premium' %}
+                <button class="tier-btn current">Current Plan</button>
+                {% elif user %}
+                <button class="tier-btn upgrade premium-btn" id="premiumBtn" onclick="checkout('premium')">
+                    Go Premium
+                </button>
+                {% else %}
+                <a href="/login" class="tier-btn upgrade premium-btn">Login to Upgrade</a>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="faq-section">
+            <h2>Frequently Asked Questions</h2>
+            <div class="faq-item">
+                <div class="faq-q">What payment methods do you accept?</div>
+                <div class="faq-a">We accept all major credit cards (Visa, Mastercard, American Express) through our secure Stripe payment system.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-q">Can I cancel anytime?</div>
+                <div class="faq-a">Yes! You can cancel your subscription at any time. No questions asked. Your access continues until the end of your billing period.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-q">What is Multi-timeframe analysis?</div>
+                <div class="faq-a">Analyze up to 5 charts simultaneously across different timeframes for a comprehensive market view and better trade confirmation.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-q">Is my payment information secure?</div>
+                <div class="faq-a">Absolutely! All payments are processed through Stripe, a PCI-compliant payment processor. We never store your card details.</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let stripeConfigured = false;
+        
+        // Check if Stripe is configured
+        async function checkStripeConfig() {
+            try {
+                const response = await fetch('/api/stripe-config');
+                const data = await response.json();
+                stripeConfigured = data.configured;
+                
+                if (!stripeConfigured) {
+                    document.getElementById('stripeAlert').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error checking Stripe config:', error);
+            }
+        }
+        
+        // Initiate checkout
+        async function checkout(tier) {
+            const btn = document.getElementById(tier === 'pro' ? 'proBtn' : 'premiumBtn');
+            const originalText = btn.innerHTML;
+            
+            if (!stripeConfigured) {
+                alert('Payment system is being configured. Please contact admin for manual upgrade or try again later.');
+                return;
+            }
+            
+            btn.innerHTML = '<span class="spinner"></span>Processing...';
+            btn.disabled = true;
+            
+            try {
+                const response = await fetch('/api/create-checkout-session', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ tier: tier })
+                });
+                
+                const data = await response.json();
+                
+                if (data.checkout_url) {
+                    window.location.href = data.checkout_url;
+                } else if (data.error) {
+                    alert('Error: ' + data.error);
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            } catch (error) {
+                console.error('Checkout error:', error);
+                alert('Payment failed. Please try again or contact support.');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+        
+        // Check config on page load
+        checkStripeConfig();
+    </script>
+</body>
+</html>
