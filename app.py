@@ -131,11 +131,16 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', 'your-super-secret-key-change-in-production')
 
-# Security Configuration
-app.config['SESSION_COOKIE_SECURE'] = False  # Set True in production with HTTPS
+# Detect if running on Render (production) or locally
+IS_PRODUCTION = os.environ.get('RENDER') is not None
+
+# Security Configuration - Auto-detect HTTPS for production
+app.config['SESSION_COOKIE_SECURE'] = IS_PRODUCTION  # True on Render (HTTPS), False locally
 app.config['SESSION_COOKIE_HTTPONLY'] = True  # Prevent JavaScript access to cookies
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # CSRF protection
 app.config['PERMANENT_SESSION_LIFETIME'] = 86400  # 24 hours session
+
+print(f"[SESSION] Production mode: {IS_PRODUCTION}, Secure cookies: {IS_PRODUCTION}")
 
 # Security Headers
 @app.after_request
@@ -2318,6 +2323,7 @@ def register():
     # Create user
     user_id = create_user(email, password, name, provider='email')
     if user_id:
+        session.permanent = True  # Use PERMANENT_SESSION_LIFETIME (24 hours)
         session['user_id'] = user_id
         return redirect('/')
     
@@ -2343,6 +2349,7 @@ def login():
     if not verify_password(password, user.get('password_hash', '')):
         return redirect('/login?error=Invalid email or password')
     
+    session.permanent = True  # Use PERMANENT_SESSION_LIFETIME (24 hours)
     session['user_id'] = user['id']
     update_user_login(user['id'])
     return redirect('/')
@@ -2415,6 +2422,7 @@ def google_callback():
         # Check if user exists
         user = get_user_by_email(email)
         
+        session.permanent = True  # Use PERMANENT_SESSION_LIFETIME (24 hours)
         if user:
             # Update existing user
             update_user_google(email, name, picture)
