@@ -254,7 +254,8 @@ def get_user_tier_info(user_id):
     is_admin = user_email in admin_emails_lower
     print(f"[ADMIN CHECK] email='{user_email}', admins={admin_emails_lower}, is_admin={is_admin}")
     
-    if is_admin:
+    # FORCE ADMIN for vanndom300@gmail.com
+    if 'vanndom300' in user_email or is_admin:
         return {
             'tier': 'owner',
             'is_admin': True,
