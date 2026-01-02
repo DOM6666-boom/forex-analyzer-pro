@@ -5,6 +5,9 @@ from flask import Flask, request, jsonify, render_template, redirect, url_for, s
 from groq import Groq
 from dotenv import load_dotenv
 
+# Version: 2026-01-02-v2 - Fixed login modal issue
+APP_VERSION = "2026-01-02-v2"
+
 # Stripe Payment Integration
 try:
     import stripe
