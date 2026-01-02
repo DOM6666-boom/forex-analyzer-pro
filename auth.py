@@ -305,11 +305,25 @@ def login_required(f):
         user = get_user_by_id(session['user_id'])
         if not user:
             session.clear()
+            if request.is_json or (request.content_type and 'multipart/form-data' in request.content_type):
+                return jsonify({'error': 'Session expired. Please login again.', 'redirect': '/login'}), 401
             return redirect('/login?error=Session expired. Please login again.')
+        # Store user in request context for reuse
+        from flask import g
+        g.current_user = user
         return f(*args, **kwargs)
     return decorated_function
 
 def get_current_user():
+    """Get current user - uses cached version from login_required if available"""
+    from flask import g
+    # First check if already loaded by login_required decorator
+    if hasattr(g, 'current_user') and g.current_user:
+        return g.current_user
+    # Fallback to database lookup
     if 'user_id' in session:
-        return get_user_by_id(session['user_id'])
+        user = get_user_by_id(session['user_id'])
+        if user:
+            g.current_user = user
+        return user
     return None

@@ -2560,6 +2560,10 @@ def analyze():
     """Analyze chart - requires authentication"""
     user = get_current_user()
     
+    # Handle case where user is None (session expired)
+    if not user:
+        return jsonify({'error': 'Session expired. Please login again.', 'redirect': '/login'}), 401
+    
     # Check analysis limit
     allowed, remaining = check_analysis_limit(user['id'])
     if not allowed:
@@ -3050,6 +3054,10 @@ def analyze_mtf():
     """Multi-timeframe analysis endpoint - requires authentication"""
     user = get_current_user()
     
+    # Handle case where user is None (session expired)
+    if not user:
+        return jsonify({'error': 'Session expired. Please login again.', 'redirect': '/login'}), 401
+    
     # Check if user has MTF access (Pro or Premium only)
     tier_info = get_user_tier_info(user['id'])
     if not tier_info or not tier_info['limits'].get('mtf_enabled', False):
@@ -3232,6 +3240,9 @@ def pricing_page():
 def history_page():
     """User's analysis history"""
     user = get_current_user()
+    if not user:
+        session.clear()
+        return redirect('/login?error=Session expired. Please login again.')
     history = get_user_history(user['id'], limit=50)
     return render_template('history.html', user=user, history=history)
 
@@ -3260,6 +3271,8 @@ def settings_page():
 def api_history():
     """Get user's analysis history as JSON"""
     user = get_current_user()
+    if not user:
+        return jsonify({'error': 'Session expired', 'redirect': '/login'}), 401
     history = get_user_history(user['id'], limit=50)
     return jsonify({'history': history})
 
@@ -3274,6 +3287,9 @@ def create_checkout_session():
         return jsonify({'error': 'Payment system not configured'}), 500
     
     user = get_current_user()
+    if not user:
+        return jsonify({'error': 'Session expired', 'redirect': '/login'}), 401
+    
     data = request.get_json()
     tier = data.get('tier', 'pro')
     
@@ -3314,6 +3330,10 @@ def payment_success():
     """Handle successful payment"""
     session_id = request.args.get('session_id')
     user = get_current_user()
+    
+    if not user:
+        session.clear()
+        return redirect('/login?error=Session expired. Please login again.')
     
     if session_id and STRIPE_AVAILABLE:
         try:
