@@ -3239,13 +3239,16 @@ def settings_page():
     try:
         user = get_current_user()
         if not user:
-            return redirect('/login')
+            # User not found in database - clear session and redirect to login
+            session.clear()
+            return redirect('/login?error=Session expired. Please login again.')
         tier_info = get_user_tier_info(user['id'])
         return render_template('settings.html', user=user, tier_info=tier_info)
     except Exception as e:
         import traceback
         print(f"[SETTINGS ERROR] {traceback.format_exc()}")
-        return f"<h1>Settings Error</h1><pre>{str(e)}</pre><br><a href='/'>Go Home</a>", 500
+        session.clear()
+        return redirect('/login?error=Something went wrong. Please login again.')
 
 
 @app.route('/api/history')

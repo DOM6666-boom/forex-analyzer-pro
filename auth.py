@@ -287,6 +287,11 @@ def login_required(f):
             if request.is_json or (request.content_type and 'multipart/form-data' in request.content_type):
                 return jsonify({'error': 'Login required', 'redirect': '/login'}), 401
             return redirect('/login')
+        # Verify user exists in database
+        user = get_user_by_id(session['user_id'])
+        if not user:
+            session.clear()
+            return redirect('/login?error=Session expired. Please login again.')
         return f(*args, **kwargs)
     return decorated_function
 
