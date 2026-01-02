@@ -1661,6 +1661,196 @@
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
+        
+        /* ========== WATCHLIST MOVERS - PREMIUM ========== */
+        .watchlist-panel {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 16px;
+            border: 1px solid var(--border-color);
+            margin-top: 15px;
+        }
+        
+        .watchlist-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .watchlist-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        
+        .watchlist-title-icon {
+            font-size: 1.1rem;
+        }
+        
+        .watchlist-refresh {
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 5px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            transition: all 0.2s ease;
+        }
+        
+        .watchlist-refresh:hover {
+            background: rgba(0, 212, 255, 0.1);
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+        
+        .watchlist-refresh.loading {
+            animation: spin 1s linear infinite;
+        }
+        
+        .watchlist-items {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .watchlist-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 14px;
+            background: var(--bg-input);
+            border-radius: 12px;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .watchlist-item:hover {
+            background: rgba(0, 212, 255, 0.08);
+            border-color: var(--border-glow);
+            transform: translateX(4px);
+        }
+        
+        .watchlist-item.rising {
+            border-left: 3px solid var(--accent-green);
+        }
+        
+        .watchlist-item.falling {
+            border-left: 3px solid var(--accent-red);
+        }
+        
+        .watchlist-left {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        
+        .watchlist-symbol-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .watchlist-symbol {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+        }
+        
+        .watchlist-trend-icon {
+            font-size: 0.8rem;
+        }
+        
+        .watchlist-trend-icon.up {
+            color: var(--accent-green);
+        }
+        
+        .watchlist-trend-icon.down {
+            color: var(--accent-red);
+        }
+        
+        .watchlist-status {
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        
+        .watchlist-status.rising {
+            color: var(--accent-green);
+        }
+        
+        .watchlist-status.falling {
+            color: var(--accent-red);
+        }
+        
+        .watchlist-status.stable {
+            color: var(--text-secondary);
+        }
+        
+        .watchlist-center {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            padding: 0 10px;
+        }
+        
+        .watchlist-chart {
+            width: 60px;
+            height: 30px;
+        }
+        
+        .watchlist-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 2px;
+        }
+        
+        .watchlist-change {
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+        
+        .watchlist-change.up {
+            color: var(--accent-green);
+        }
+        
+        .watchlist-change.down {
+            color: var(--accent-red);
+        }
+        
+        .watchlist-price {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .watchlist-loading {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-secondary);
+        }
+        
+        .watchlist-loading .spinner {
+            width: 30px;
+            height: 30px;
+            margin-bottom: 10px;
+        }
+        
+        @media (max-width: 1200px) {
+            .watchlist-panel {
+                margin-top: 15px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1913,6 +2103,23 @@
                 </div>
                 <div class="history-list" id="historyList">
                     <div class="no-history">No signals yet. Analyze a chart to get started!</div>
+                </div>
+                
+                <!-- Watchlist Movers Widget -->
+                <div class="watchlist-panel">
+                    <div class="watchlist-header">
+                        <div class="watchlist-title">
+                            <span class="watchlist-title-icon">📈</span>
+                            <span>Market Movers</span>
+                        </div>
+                        <button class="watchlist-refresh" onclick="refreshWatchlist()" id="watchlistRefreshBtn">🔄 Refresh</button>
+                    </div>
+                    <div class="watchlist-items" id="watchlistItems">
+                        <div class="watchlist-loading">
+                            <div class="spinner"></div>
+                            <div>Loading market data...</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -3517,6 +3724,137 @@
         
         // Load user info on page load
         loadUserInfo();
+        
+        // ========== WATCHLIST MOVERS ==========
+        const watchlistSymbols = [
+            { symbol: 'XAU/USD', name: 'Gold', icon: '🥇' },
+            { symbol: 'EUR/USD', name: 'Euro', icon: '💶' },
+            { symbol: 'GBP/USD', name: 'Pound', icon: '💷' },
+            { symbol: 'BTC/USD', name: 'Bitcoin', icon: '₿' },
+            { symbol: 'ETH/USD', name: 'Ethereum', icon: '⟠' },
+            { symbol: 'USD/JPY', name: 'Yen', icon: '💴' }
+        ];
+        
+        // Simulated price data (will be replaced with real API)
+        let watchlistData = {};
+        
+        function generateMiniChart(trend) {
+            const points = [];
+            let value = 50;
+            for (let i = 0; i < 10; i++) {
+                value += (Math.random() - (trend === 'up' ? 0.3 : 0.7)) * 10;
+                value = Math.max(10, Math.min(90, value));
+                points.push(value);
+            }
+            
+            const color = trend === 'up' ? '#3fb950' : '#f85149';
+            const pathData = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${i * 7} ${100 - p}`).join(' ');
+            
+            return `<svg class="watchlist-chart" viewBox="0 0 63 100" preserveAspectRatio="none">
+                <path d="${pathData}" stroke="${color}" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>`;
+        }
+        
+        async function fetchWatchlistData() {
+            // Generate realistic mock data
+            const mockPrices = {
+                'XAU/USD': { price: 2385 + Math.random() * 50, baseChange: 0.5 },
+                'EUR/USD': { price: 1.08 + Math.random() * 0.02, baseChange: 0.2 },
+                'GBP/USD': { price: 1.26 + Math.random() * 0.02, baseChange: 0.3 },
+                'BTC/USD': { price: 67000 + Math.random() * 3000, baseChange: 2 },
+                'ETH/USD': { price: 3400 + Math.random() * 200, baseChange: 1.5 },
+                'USD/JPY': { price: 154 + Math.random() * 3, baseChange: 0.4 }
+            };
+            
+            watchlistSymbols.forEach(item => {
+                const mock = mockPrices[item.symbol];
+                const changePercent = (Math.random() - 0.5) * mock.baseChange * 2;
+                const isUp = changePercent > 0;
+                
+                watchlistData[item.symbol] = {
+                    price: mock.price.toFixed(item.symbol.includes('JPY') ? 2 : item.symbol.includes('BTC') || item.symbol.includes('ETH') ? 2 : item.symbol.includes('XAU') ? 2 : 5),
+                    change: (isUp ? '+' : '') + changePercent.toFixed(2) + '%',
+                    trend: isUp ? 'up' : 'down',
+                    status: Math.abs(changePercent) > 1 ? (isUp ? 'Rising fast' : 'Falling') : 'Stable'
+                };
+            });
+            
+            return watchlistData;
+        }
+        
+        async function renderWatchlist() {
+            const container = document.getElementById('watchlistItems');
+            await fetchWatchlistData();
+            
+            // Sort by absolute change (biggest movers first)
+            const sorted = [...watchlistSymbols].sort((a, b) => {
+                const changeA = Math.abs(parseFloat(watchlistData[a.symbol]?.change || 0));
+                const changeB = Math.abs(parseFloat(watchlistData[b.symbol]?.change || 0));
+                return changeB - changeA;
+            });
+            
+            let html = '';
+            sorted.forEach(item => {
+                const data = watchlistData[item.symbol];
+                if (!data) return;
+                
+                const trendClass = data.trend === 'up' ? 'rising' : 'falling';
+                const statusClass = data.status.includes('Rising') ? 'rising' : data.status.includes('Falling') ? 'falling' : 'stable';
+                
+                html += `
+                    <div class="watchlist-item ${trendClass}" onclick="selectWatchlistSymbol('${item.symbol}')">
+                        <div class="watchlist-left">
+                            <div class="watchlist-symbol-row">
+                                <span class="watchlist-symbol">${item.icon} ${item.name}</span>
+                                <span class="watchlist-trend-icon ${data.trend}">${data.trend === 'up' ? '↗' : '↘'}</span>
+                            </div>
+                            <span class="watchlist-status ${statusClass}">${data.status}</span>
+                        </div>
+                        <div class="watchlist-center">
+                            ${generateMiniChart(data.trend)}
+                        </div>
+                        <div class="watchlist-right">
+                            <span class="watchlist-change ${data.trend}">${data.change}</span>
+                            <span class="watchlist-price">${data.price}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        function selectWatchlistSymbol(symbol) {
+            const select = document.getElementById('symbolSelect');
+            const options = select.options;
+            
+            for (let i = 0; i < options.length; i++) {
+                if (options[i].value === symbol) {
+                    select.selectedIndex = i;
+                    handleSymbolChange();
+                    break;
+                }
+            }
+        }
+        
+        async function refreshWatchlist() {
+            const btn = document.getElementById('watchlistRefreshBtn');
+            btn.classList.add('loading');
+            btn.disabled = true;
+            
+            await renderWatchlist();
+            
+            setTimeout(() => {
+                btn.classList.remove('loading');
+                btn.disabled = false;
+            }, 500);
+        }
+        
+        // Initialize watchlist
+        renderWatchlist();
+        
+        // Auto-refresh every 30 seconds
+        setInterval(renderWatchlist, 30000);
     </script>
     
     <!-- Session Timer Backup Script -->
