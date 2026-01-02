@@ -3915,5 +3915,99 @@
         setInterval(updateTime, 1000);
     })();
     </script>
+    
+    <!-- Watchlist Backup Script -->
+    <script>
+    (function() {
+        var symbols = [
+            { symbol: 'XAU/USD', name: 'Gold', icon: '🥇' },
+            { symbol: 'EUR/USD', name: 'Euro', icon: '💶' },
+            { symbol: 'GBP/USD', name: 'Pound', icon: '💷' },
+            { symbol: 'BTC/USD', name: 'Bitcoin', icon: '₿' },
+            { symbol: 'ETH/USD', name: 'Ethereum', icon: '⟠' },
+            { symbol: 'USD/JPY', name: 'Yen', icon: '💴' }
+        ];
+        
+        function randomPrice(base, range) {
+            return base + (Math.random() * range);
+        }
+        
+        function generateChart(isUp) {
+            var points = [];
+            var val = 50;
+            for (var i = 0; i < 10; i++) {
+                val = val + (Math.random() - (isUp ? 0.3 : 0.7)) * 10;
+                if (val < 10) val = 10;
+                if (val > 90) val = 90;
+                points.push(val);
+            }
+            var color = isUp ? '#3fb950' : '#f85149';
+            var path = '';
+            for (var j = 0; j < points.length; j++) {
+                path += (j === 0 ? 'M' : 'L') + ' ' + (j * 7) + ' ' + (100 - points[j]) + ' ';
+            }
+            return '<svg class="watchlist-chart" viewBox="0 0 63 100" preserveAspectRatio="none"><path d="' + path + '" stroke="' + color + '" stroke-width="2" fill="none" stroke-linecap="round"/></svg>';
+        }
+        
+        function loadWatchlist() {
+            var container = document.getElementById('watchlistItems');
+            if (!container) return;
+            
+            var prices = {
+                'XAU/USD': { price: randomPrice(2380, 50), decimals: 2 },
+                'EUR/USD': { price: randomPrice(1.08, 0.02), decimals: 5 },
+                'GBP/USD': { price: randomPrice(1.26, 0.02), decimals: 5 },
+                'BTC/USD': { price: randomPrice(67000, 3000), decimals: 2 },
+                'ETH/USD': { price: randomPrice(3400, 200), decimals: 2 },
+                'USD/JPY': { price: randomPrice(154, 3), decimals: 2 }
+            };
+            
+            var html = '';
+            for (var i = 0; i < symbols.length; i++) {
+                var s = symbols[i];
+                var p = prices[s.symbol];
+                var change = (Math.random() - 0.5) * 4;
+                var isUp = change > 0;
+                var trendClass = isUp ? 'rising' : 'falling';
+                var status = Math.abs(change) > 1 ? (isUp ? 'Rising fast' : 'Falling') : 'Stable';
+                var statusClass = status === 'Rising fast' ? 'rising' : status === 'Falling' ? 'falling' : 'stable';
+                
+                html += '<div class="watchlist-item ' + trendClass + '" onclick="if(typeof selectWatchlistSymbol===\'function\')selectWatchlistSymbol(\'' + s.symbol + '\')">';
+                html += '<div class="watchlist-left">';
+                html += '<div class="watchlist-symbol-row">';
+                html += '<span class="watchlist-symbol">' + s.icon + ' ' + s.name + '</span>';
+                html += '<span class="watchlist-trend-icon ' + (isUp ? 'up' : 'down') + '">' + (isUp ? '↗' : '↘') + '</span>';
+                html += '</div>';
+                html += '<span class="watchlist-status ' + statusClass + '">' + status + '</span>';
+                html += '</div>';
+                html += '<div class="watchlist-center">' + generateChart(isUp) + '</div>';
+                html += '<div class="watchlist-right">';
+                html += '<span class="watchlist-change ' + (isUp ? 'up' : 'down') + '">' + (isUp ? '+' : '') + change.toFixed(2) + '%</span>';
+                html += '<span class="watchlist-price">' + p.price.toFixed(p.decimals) + '</span>';
+                html += '</div>';
+                html += '</div>';
+            }
+            
+            container.innerHTML = html;
+        }
+        
+        // Load immediately
+        setTimeout(loadWatchlist, 500);
+        
+        // Refresh every 30 seconds
+        setInterval(loadWatchlist, 30000);
+        
+        // Make refresh button work
+        var refreshBtn = document.getElementById('watchlistRefreshBtn');
+        if (refreshBtn) {
+            refreshBtn.onclick = function() {
+                this.style.animation = 'spin 1s linear';
+                loadWatchlist();
+                var btn = this;
+                setTimeout(function() { btn.style.animation = ''; }, 1000);
+            };
+        }
+    })();
+    </script>
 </body>
 </html>
