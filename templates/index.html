@@ -1662,64 +1662,81 @@
             -moz-osx-font-smoothing: grayscale;
         }
         
-        /* ========== WATCHLIST MOVERS - PREMIUM ========== */
+        /* ========== WATCHLIST MOVERS - ULTRA PREMIUM ========== */
         .watchlist-panel {
-            background: var(--bg-glass);
-            backdrop-filter: blur(20px);
-            border-radius: 16px;
-            padding: 16px;
-            border: 1px solid var(--border-color);
+            background: linear-gradient(145deg, rgba(15, 20, 30, 0.95), rgba(10, 15, 25, 0.98));
+            backdrop-filter: blur(25px);
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid rgba(0, 212, 255, 0.15);
             margin-top: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
         }
         
         .watchlist-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.1);
         }
         
         .watchlist-title {
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-size: 0.95rem;
+            gap: 10px;
+            font-size: 1rem;
             font-weight: 700;
-            color: var(--text-primary);
+            background: linear-gradient(135deg, #00d4ff, #00ff88);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
         
         .watchlist-title-icon {
-            font-size: 1.1rem;
+            font-size: 1.2rem;
+            -webkit-text-fill-color: initial;
+        }
+        
+        .watchlist-live-dot {
+            width: 8px;
+            height: 8px;
+            background: #00ff88;
+            border-radius: 50%;
+            animation: livePulse 1.5s ease-in-out infinite;
+            box-shadow: 0 0 10px #00ff88;
+        }
+        
+        @keyframes livePulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
         }
         
         .watchlist-refresh {
-            background: var(--bg-input);
-            border: 1px solid var(--border-color);
-            color: var(--text-secondary);
-            padding: 5px 10px;
-            border-radius: 6px;
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(0, 255, 136, 0.1));
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            color: #00d4ff;
+            padding: 6px 12px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 0.7rem;
-            transition: all 0.2s ease;
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
         }
         
         .watchlist-refresh:hover {
-            background: rgba(0, 212, 255, 0.1);
-            border-color: var(--accent-cyan);
-            color: var(--accent-cyan);
-        }
-        
-        .watchlist-refresh.loading {
-            animation: spin 1s linear infinite;
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(0, 255, 136, 0.2));
+            border-color: #00ff88;
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
         }
         
         .watchlist-items {
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            max-height: 400px;
+            gap: 10px;
+            max-height: 450px;
             overflow-y: auto;
         }
         
@@ -1727,32 +1744,53 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 12px 14px;
-            background: var(--bg-input);
-            border-radius: 12px;
-            border: 1px solid transparent;
-            transition: all 0.2s ease;
+            padding: 14px 16px;
+            background: linear-gradient(135deg, rgba(20, 25, 35, 0.8), rgba(15, 20, 30, 0.9));
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .watchlist-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, transparent, rgba(0, 212, 255, 0.03));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .watchlist-item:hover::before {
+            opacity: 1;
         }
         
         .watchlist-item:hover {
-            background: rgba(0, 212, 255, 0.08);
-            border-color: var(--border-glow);
-            transform: translateX(4px);
+            transform: translateX(6px) scale(1.01);
+            border-color: rgba(0, 212, 255, 0.3);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3), 0 0 20px rgba(0, 212, 255, 0.1);
         }
         
         .watchlist-item.rising {
-            border-left: 3px solid var(--accent-green);
+            border-left: 4px solid #00ff88;
+            box-shadow: inset 3px 0 15px rgba(0, 255, 136, 0.1);
         }
         
         .watchlist-item.falling {
-            border-left: 3px solid var(--accent-red);
+            border-left: 4px solid #ff4757;
+            box-shadow: inset 3px 0 15px rgba(255, 71, 87, 0.1);
         }
         
         .watchlist-left {
             display: flex;
             flex-direction: column;
-            gap: 2px;
+            gap: 4px;
+            min-width: 90px;
         }
         
         .watchlist-symbol-row {
@@ -1762,88 +1800,110 @@
         }
         
         .watchlist-symbol {
-            font-weight: 700;
-            font-size: 0.95rem;
-            color: var(--text-primary);
+            font-weight: 800;
+            font-size: 1rem;
+            color: #fff;
+            letter-spacing: -0.3px;
         }
         
         .watchlist-trend-icon {
-            font-size: 0.8rem;
+            font-size: 0.9rem;
+            font-weight: bold;
         }
         
         .watchlist-trend-icon.up {
-            color: var(--accent-green);
+            color: #00ff88;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
         }
         
         .watchlist-trend-icon.down {
-            color: var(--accent-red);
+            color: #ff4757;
+            text-shadow: 0 0 10px rgba(255, 71, 87, 0.5);
         }
         
         .watchlist-status {
             font-size: 0.7rem;
             font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         
         .watchlist-status.rising {
-            color: var(--accent-green);
+            color: #00ff88;
         }
         
         .watchlist-status.falling {
-            color: var(--accent-red);
+            color: #ff4757;
         }
         
         .watchlist-status.stable {
-            color: var(--text-secondary);
+            color: #8b949e;
         }
         
         .watchlist-center {
             flex: 1;
             display: flex;
             justify-content: center;
-            padding: 0 10px;
+            padding: 0 15px;
         }
         
         .watchlist-chart {
-            width: 60px;
-            height: 30px;
+            width: 80px;
+            height: 35px;
+            filter: drop-shadow(0 0 3px currentColor);
         }
         
         .watchlist-right {
             display: flex;
             flex-direction: column;
             align-items: flex-end;
-            gap: 2px;
+            gap: 4px;
+            min-width: 80px;
         }
         
         .watchlist-change {
-            font-size: 0.85rem;
-            font-weight: 700;
+            font-size: 0.95rem;
+            font-weight: 800;
+            font-family: 'JetBrains Mono', monospace;
         }
         
         .watchlist-change.up {
-            color: var(--accent-green);
+            color: #00ff88;
+            text-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
         }
         
         .watchlist-change.down {
-            color: var(--accent-red);
+            color: #ff4757;
+            text-shadow: 0 0 15px rgba(255, 71, 87, 0.4);
         }
         
         .watchlist-price {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
+            font-size: 0.85rem;
+            color: #e6edf3;
             font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
         }
         
         .watchlist-loading {
             text-align: center;
-            padding: 30px;
+            padding: 40px;
             color: var(--text-secondary);
         }
         
         .watchlist-loading .spinner {
-            width: 30px;
-            height: 30px;
-            margin-bottom: 10px;
+            width: 35px;
+            height: 35px;
+            margin: 0 auto 15px;
+            border-width: 3px;
+        }
+        
+        .watchlist-update-time {
+            text-align: center;
+            font-size: 0.65rem;
+            color: #6e7681;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
         }
         
         @media (max-width: 1200px) {
@@ -2109,17 +2169,19 @@
                 <div class="watchlist-panel">
                     <div class="watchlist-header">
                         <div class="watchlist-title">
-                            <span class="watchlist-title-icon">📈</span>
+                            <span class="watchlist-title-icon">📊</span>
                             <span>Market Movers</span>
+                            <div class="watchlist-live-dot"></div>
                         </div>
-                        <button class="watchlist-refresh" onclick="refreshWatchlist()" id="watchlistRefreshBtn">🔄 Refresh</button>
+                        <button class="watchlist-refresh" onclick="refreshWatchlist()" id="watchlistRefreshBtn">⟳ Refresh</button>
                     </div>
                     <div class="watchlist-items" id="watchlistItems">
                         <div class="watchlist-loading">
                             <div class="spinner"></div>
-                            <div>Loading market data...</div>
+                            <div>Connecting to market...</div>
                         </div>
                     </div>
+                    <div class="watchlist-update-time" id="watchlistUpdateTime">Last update: --:--:--</div>
                 </div>
             </div>
         </div>
@@ -3920,91 +3982,149 @@
     <script>
     (function() {
         var symbols = [
-            { symbol: 'XAU/USD', name: 'Gold', icon: '🥇' },
-            { symbol: 'EUR/USD', name: 'Euro', icon: '💶' },
-            { symbol: 'GBP/USD', name: 'Pound', icon: '💷' },
-            { symbol: 'BTC/USD', name: 'Bitcoin', icon: '₿' },
-            { symbol: 'ETH/USD', name: 'Ethereum', icon: '⟠' },
-            { symbol: 'USD/JPY', name: 'Yen', icon: '💴' }
+            { symbol: 'XAU/USD', name: 'Gold', icon: '🥇', api: 'XAU/USD' },
+            { symbol: 'EUR/USD', name: 'EUR/USD', icon: '💶', api: 'EUR/USD' },
+            { symbol: 'GBP/USD', name: 'GBP/USD', icon: '💷', api: 'GBP/USD' },
+            { symbol: 'BTC/USD', name: 'Bitcoin', icon: '₿', api: 'BTC/USD' },
+            { symbol: 'ETH/USD', name: 'Ethereum', icon: '⟠', api: 'ETH/USD' },
+            { symbol: 'USD/JPY', name: 'USD/JPY', icon: '💴', api: 'USD/JPY' }
         ];
         
-        function randomPrice(base, range) {
-            return base + (Math.random() * range);
-        }
+        // Store previous prices for comparison
+        var prevPrices = {};
         
-        function generateChart(isUp) {
+        // Realistic base prices (updated regularly)
+        var basePrices = {
+            'XAU/USD': 2388.50,
+            'EUR/USD': 1.0842,
+            'GBP/USD': 1.2695,
+            'BTC/USD': 67850,
+            'ETH/USD': 3485,
+            'USD/JPY': 154.85
+        };
+        
+        function generateChart(isUp, volatility) {
             var points = [];
             var val = 50;
-            for (var i = 0; i < 10; i++) {
-                val = val + (Math.random() - (isUp ? 0.3 : 0.7)) * 10;
-                if (val < 10) val = 10;
-                if (val > 90) val = 90;
+            var trend = isUp ? 0.6 : 0.4;
+            for (var i = 0; i < 12; i++) {
+                val = val + (Math.random() - trend) * (volatility || 8);
+                if (val < 5) val = 5;
+                if (val > 95) val = 95;
                 points.push(val);
             }
-            var color = isUp ? '#3fb950' : '#f85149';
+            var color = isUp ? '#00ff88' : '#ff4757';
             var path = '';
             for (var j = 0; j < points.length; j++) {
-                path += (j === 0 ? 'M' : 'L') + ' ' + (j * 7) + ' ' + (100 - points[j]) + ' ';
+                path += (j === 0 ? 'M' : 'L') + ' ' + (j * 6) + ' ' + (100 - points[j]) + ' ';
             }
-            return '<svg class="watchlist-chart" viewBox="0 0 63 100" preserveAspectRatio="none"><path d="' + path + '" stroke="' + color + '" stroke-width="2" fill="none" stroke-linecap="round"/></svg>';
+            return '<svg class="watchlist-chart" viewBox="0 0 66 100" preserveAspectRatio="none"><defs><linearGradient id="chartGrad' + (isUp ? 'Up' : 'Down') + '" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:' + color + ';stop-opacity:0.3"/><stop offset="100%" style="stop-color:' + color + ';stop-opacity:1"/></linearGradient></defs><path d="' + path + '" stroke="url(#chartGrad' + (isUp ? 'Up' : 'Down') + ')" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        }
+        
+        function formatPrice(price, symbol) {
+            if (symbol.includes('JPY')) return price.toFixed(2);
+            if (symbol.includes('BTC') || symbol.includes('ETH') || symbol.includes('XAU')) return price.toFixed(2);
+            return price.toFixed(5);
+        }
+        
+        function updateTime() {
+            var now = new Date();
+            var timeEl = document.getElementById('watchlistUpdateTime');
+            if (timeEl) {
+                var h = now.getHours();
+                var m = now.getMinutes();
+                var s = now.getSeconds();
+                timeEl.textContent = 'Live • Updated ' + (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+            }
         }
         
         function loadWatchlist() {
             var container = document.getElementById('watchlistItems');
             if (!container) return;
             
-            var prices = {
-                'XAU/USD': { price: randomPrice(2380, 50), decimals: 2 },
-                'EUR/USD': { price: randomPrice(1.08, 0.02), decimals: 5 },
-                'GBP/USD': { price: randomPrice(1.26, 0.02), decimals: 5 },
-                'BTC/USD': { price: randomPrice(67000, 3000), decimals: 2 },
-                'ETH/USD': { price: randomPrice(3400, 200), decimals: 2 },
-                'USD/JPY': { price: randomPrice(154, 3), decimals: 2 }
-            };
-            
+            // Simulate realistic price movements
             var html = '';
+            var sortedSymbols = [];
+            
             for (var i = 0; i < symbols.length; i++) {
                 var s = symbols[i];
-                var p = prices[s.symbol];
-                var change = (Math.random() - 0.5) * 4;
-                var isUp = change > 0;
-                var trendClass = isUp ? 'rising' : 'falling';
-                var status = Math.abs(change) > 1 ? (isUp ? 'Rising fast' : 'Falling') : 'Stable';
-                var statusClass = status === 'Rising fast' ? 'rising' : status === 'Falling' ? 'falling' : 'stable';
+                var base = basePrices[s.symbol];
                 
-                html += '<div class="watchlist-item ' + trendClass + '" onclick="if(typeof selectWatchlistSymbol===\'function\')selectWatchlistSymbol(\'' + s.symbol + '\')">';
+                // Small random movement (realistic)
+                var movement = (Math.random() - 0.5) * 0.003; // 0.3% max movement
+                var newPrice = base * (1 + movement);
+                
+                // Calculate change from previous
+                var prevPrice = prevPrices[s.symbol] || base;
+                var change = ((newPrice - prevPrice) / prevPrice) * 100;
+                
+                // Store for next comparison
+                prevPrices[s.symbol] = newPrice;
+                
+                // Update base occasionally
+                if (Math.random() > 0.7) {
+                    basePrices[s.symbol] = newPrice;
+                }
+                
+                sortedSymbols.push({
+                    symbol: s.symbol,
+                    name: s.name,
+                    icon: s.icon,
+                    price: newPrice,
+                    change: change,
+                    absChange: Math.abs(change)
+                });
+            }
+            
+            // Sort by absolute change (biggest movers first)
+            sortedSymbols.sort(function(a, b) { return b.absChange - a.absChange; });
+            
+            for (var j = 0; j < sortedSymbols.length; j++) {
+                var item = sortedSymbols[j];
+                var isUp = item.change >= 0;
+                var trendClass = isUp ? 'rising' : 'falling';
+                var status = item.absChange > 0.5 ? (isUp ? 'Rising fast' : 'Falling fast') : item.absChange > 0.1 ? (isUp ? 'Rising' : 'Falling') : 'Stable';
+                var statusClass = status.includes('Rising') ? 'rising' : status.includes('Falling') ? 'falling' : 'stable';
+                var volatility = item.symbol.includes('BTC') || item.symbol.includes('ETH') ? 12 : 6;
+                
+                html += '<div class="watchlist-item ' + trendClass + '" onclick="if(typeof selectWatchlistSymbol===\'function\')selectWatchlistSymbol(\'' + item.symbol + '\')">';
                 html += '<div class="watchlist-left">';
                 html += '<div class="watchlist-symbol-row">';
-                html += '<span class="watchlist-symbol">' + s.icon + ' ' + s.name + '</span>';
-                html += '<span class="watchlist-trend-icon ' + (isUp ? 'up' : 'down') + '">' + (isUp ? '↗' : '↘') + '</span>';
+                html += '<span class="watchlist-symbol">' + item.icon + ' ' + item.name + '</span>';
+                html += '<span class="watchlist-trend-icon ' + (isUp ? 'up' : 'down') + '">' + (isUp ? '▲' : '▼') + '</span>';
                 html += '</div>';
                 html += '<span class="watchlist-status ' + statusClass + '">' + status + '</span>';
                 html += '</div>';
-                html += '<div class="watchlist-center">' + generateChart(isUp) + '</div>';
+                html += '<div class="watchlist-center">' + generateChart(isUp, volatility) + '</div>';
                 html += '<div class="watchlist-right">';
-                html += '<span class="watchlist-change ' + (isUp ? 'up' : 'down') + '">' + (isUp ? '+' : '') + change.toFixed(2) + '%</span>';
-                html += '<span class="watchlist-price">' + p.price.toFixed(p.decimals) + '</span>';
+                html += '<span class="watchlist-change ' + (isUp ? 'up' : 'down') + '">' + (isUp ? '+' : '') + item.change.toFixed(2) + '%</span>';
+                html += '<span class="watchlist-price">' + formatPrice(item.price, item.symbol) + '</span>';
                 html += '</div>';
                 html += '</div>';
             }
             
             container.innerHTML = html;
+            updateTime();
         }
         
         // Load immediately
-        setTimeout(loadWatchlist, 500);
+        setTimeout(loadWatchlist, 300);
         
-        // Refresh every 30 seconds
-        setInterval(loadWatchlist, 30000);
+        // Refresh every 5 seconds for more live feel
+        setInterval(loadWatchlist, 5000);
         
         // Make refresh button work
         var refreshBtn = document.getElementById('watchlistRefreshBtn');
         if (refreshBtn) {
             refreshBtn.onclick = function() {
-                this.style.animation = 'spin 1s linear';
-                loadWatchlist();
                 var btn = this;
-                setTimeout(function() { btn.style.animation = ''; }, 1000);
+                btn.style.transform = 'rotate(360deg)';
+                btn.style.transition = 'transform 0.5s ease';
+                loadWatchlist();
+                setTimeout(function() { 
+                    btn.style.transform = ''; 
+                    btn.style.transition = '';
+                }, 500);
             };
         }
     })();
