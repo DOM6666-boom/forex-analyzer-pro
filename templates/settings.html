@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Settings - Pro Forex Analyzer</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%2300d4ff'/><stop offset='100%25' style='stop-color:%2300ff88'/></linearGradient></defs><circle cx='50' cy='50' r='45' fill='%230a0a1a' stroke='url(%23g)' stroke-width='3'/><path d='M25 60 L40 40 L55 50 L75 25' stroke='url(%23g)' stroke-width='4' fill='none' stroke-linecap='round' stroke-linejoin='round'/><circle cx='75' cy='25' r='5' fill='%2300ff88'/></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -24,7 +23,6 @@
             text-decoration: none;
             margin-bottom: 30px;
             font-size: 0.9rem;
-            transition: color 0.3s;
         }
         .back-btn:hover { color: #00d4ff; }
         .page-title {
@@ -48,9 +46,6 @@
             font-weight: 700;
             color: #e6edf3;
             margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
         .profile-info {
             display: flex;
@@ -64,14 +59,8 @@
             border-radius: 50%;
             border: 3px solid #00d4ff;
         }
-        .profile-details h3 {
-            font-size: 1.3rem;
-            margin-bottom: 5px;
-        }
-        .profile-details p {
-            color: #8b949e;
-            font-size: 0.9rem;
-        }
+        .profile-details h3 { font-size: 1.3rem; margin-bottom: 5px; }
+        .profile-details p { color: #8b949e; font-size: 0.9rem; }
         .tier-badge {
             display: inline-block;
             padding: 4px 12px;
@@ -81,13 +70,13 @@
             text-transform: uppercase;
             margin-top: 8px;
         }
-        .tier-badge.free { background: rgba(139, 148, 158, 0.2); color: #8b949e; }
-        .tier-badge.pro { background: rgba(0, 212, 255, 0.2); color: #00d4ff; }
-        .tier-badge.premium { background: rgba(255, 215, 0, 0.2); color: #ffd700; }
-        .tier-badge.owner { background: linear-gradient(135deg, rgba(255, 215, 0, 0.3), rgba(255, 107, 0, 0.3)); color: #ffd700; border: 1px solid #ffd700; }
+        .tier-free { background: rgba(139, 148, 158, 0.2); color: #8b949e; }
+        .tier-pro { background: rgba(0, 212, 255, 0.2); color: #00d4ff; }
+        .tier-premium { background: rgba(255, 215, 0, 0.2); color: #ffd700; }
+        .tier-owner { background: linear-gradient(135deg, rgba(255, 215, 0, 0.3), rgba(255, 107, 0, 0.3)); color: #ffd700; border: 1px solid #ffd700; }
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            grid-template-columns: repeat(3, 1fr);
             gap: 15px;
         }
         .stat-card {
@@ -96,61 +85,8 @@
             border-radius: 12px;
             text-align: center;
         }
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 800;
-            color: #00d4ff;
-        }
-        .stat-label {
-            font-size: 0.8rem;
-            color: #8b949e;
-            margin-top: 5px;
-        }
-        .usage-bar {
-            height: 8px;
-            background: rgba(48, 54, 61, 0.5);
-            border-radius: 4px;
-            overflow: hidden;
-            margin: 15px 0;
-        }
-        .usage-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #00d4ff, #00ff88);
-            border-radius: 4px;
-            transition: width 0.3s;
-        }
-        .usage-text {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.85rem;
-            color: #8b949e;
-        }
-        .action-btn {
-            display: inline-block;
-            padding: 12px 24px;
-            border-radius: 10px;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            margin-right: 10px;
-            margin-top: 15px;
-        }
-        .action-btn.primary {
-            background: linear-gradient(135deg, #00d4ff, #00ff88);
-            color: #0a0a1a;
-        }
-        .action-btn.primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
-        }
-        .action-btn.danger {
-            background: rgba(255, 71, 87, 0.1);
-            border: 1px solid rgba(255, 71, 87, 0.3);
-            color: #ff4757;
-        }
-        .action-btn.danger:hover {
-            background: rgba(255, 71, 87, 0.2);
-        }
+        .stat-value { font-size: 2rem; font-weight: 800; color: #00d4ff; }
+        .stat-label { font-size: 0.8rem; color: #8b949e; margin-top: 5px; }
         .info-row {
             display: flex;
             justify-content: space-between;
@@ -160,6 +96,25 @@
         .info-row:last-child { border-bottom: none; }
         .info-label { color: #8b949e; }
         .info-value { color: #e6edf3; font-weight: 500; }
+        .action-btn {
+            display: inline-block;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            text-decoration: none;
+            margin-right: 10px;
+            margin-top: 15px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #00d4ff, #00ff88);
+            color: #0a0a1a;
+        }
+        .btn-danger {
+            background: rgba(255, 71, 87, 0.1);
+            border: 1px solid rgba(255, 71, 87, 0.3);
+            color: #ff4757;
+        }
+        .owner-msg { color: #ffd700; font-weight: 600; }
     </style>
 </head>
 <body>
@@ -167,52 +122,45 @@
         <a href="/" class="back-btn">← Back to Analyzer</a>
         <h1 class="page-title">⚙️ Settings</h1>
         
-        <!-- Profile Section -->
         <div class="settings-section">
             <div class="section-title">👤 Profile</div>
             <div class="profile-info">
-                <img src="{{ user.picture or 'https://ui-avatars.com/api/?name=' + (user.name or user.email)|urlencode + '&background=00d4ff&color=0a0a1a&size=80' }}" 
-                     alt="Avatar" class="profile-avatar">
+                <img src="https://ui-avatars.com/api/?name={{ user.name or user.email }}&background=00d4ff&color=0a0a1a&size=80" alt="Avatar" class="profile-avatar">
                 <div class="profile-details">
-                    <h3>{{ user.name or user.email.split('@')[0] }}</h3>
+                    <h3>{{ user.name or 'User' }}</h3>
                     <p>{{ user.email }}</p>
-                    {% if 'vanndom300' in user.email %}
-                    <span class="tier-badge owner">👑 OWNER</span>
-                    {% elif tier_info and tier_info.is_admin %}
-                    <span class="tier-badge owner">👑 OWNER</span>
+                    {% set is_owner = 'vanndom300' in user.email %}
+                    {% if is_owner %}
+                    <span class="tier-badge tier-owner">👑 OWNER</span>
                     {% elif user.tier == 'premium' %}
-                    <span class="tier-badge premium">👑 PREMIUM</span>
+                    <span class="tier-badge tier-premium">👑 PREMIUM</span>
                     {% elif user.tier == 'pro' %}
-                    <span class="tier-badge pro">⭐ PRO</span>
+                    <span class="tier-badge tier-pro">⭐ PRO</span>
                     {% else %}
-                    <span class="tier-badge free">FREE</span>
+                    <span class="tier-badge tier-free">FREE</span>
                     {% endif %}
                 </div>
             </div>
             <div class="info-row">
                 <span class="info-label">Login Method</span>
-                <span class="info-value">{{ user.provider|capitalize if user.provider else 'Email' }}</span>
+                <span class="info-value">{{ user.provider or 'Email' }}</span>
             </div>
             <div class="info-row">
                 <span class="info-label">Member Since</span>
-                <span class="info-value">{{ user.created_at[:10] if user.created_at else 'N/A' }}</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Last Login</span>
-                <span class="info-value">{{ user.last_login[:16] if user.last_login else 'N/A' }}</span>
+                <span class="info-value">{{ user.created_at or 'N/A' }}</span>
             </div>
         </div>
         
-        <!-- Usage Section -->
         <div class="settings-section">
             <div class="section-title">📊 Usage</div>
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-value">{{ tier_info.analyses_today if tier_info else 0 }}</div>
+                    <div class="stat-value">{{ user.analyses_today or 0 }}</div>
                     <div class="stat-label">Today</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value">{{ tier_info.analyses_remaining if tier_info else 5 }}</div>
+                    {% set is_owner = 'vanndom300' in user.email %}
+                    <div class="stat-value">{% if is_owner %}∞{% else %}{{ 5 - (user.analyses_today or 0) }}{% endif %}</div>
                     <div class="stat-label">Remaining</div>
                 </div>
                 <div class="stat-card">
@@ -220,67 +168,22 @@
                     <div class="stat-label">Total</div>
                 </div>
             </div>
-            
-            <div style="margin-top: 25px;">
-                <div class="usage-text">
-                    <span>Daily Usage</span>
-                    <span>
-                        {% if 'vanndom300' in user.email %}
-                            Unlimited
-                        {% elif tier_info and tier_info.is_admin %}
-                            Unlimited
-                        {% elif tier_info and tier_info.limits %}
-                            {{ tier_info.analyses_today or 0 }} / {{ tier_info.limits.analyses_per_day or 5 }}
-                        {% else %}
-                            0 / 5
-                        {% endif %}
-                    </span>
-                </div>
-                {% if 'vanndom300' in user.email or (tier_info and tier_info.is_admin) %}
-                <div class="usage-bar">
-                    <div class="usage-fill" style="width: 100%; background: linear-gradient(90deg, #ffd700, #ff6b00);"></div>
-                </div>
-                {% elif tier_info and tier_info.limits %}
-                {% set daily_limit = tier_info.limits.analyses_per_day or 5 %}
-                {% set usage_percent = ((tier_info.analyses_today or 0) / daily_limit * 100) %}
-                <div class="usage-bar">
-                    <div class="usage-fill" style="width: {{ usage_percent|int }}%"></div>
-                </div>
-                {% else %}
-                <div class="usage-bar">
-                    <div class="usage-fill" style="width: 0%"></div>
-                </div>
-                {% endif %}
-            </div>
         </div>
         
-        <!-- Subscription Section -->
         <div class="settings-section">
             <div class="section-title">💎 Subscription</div>
-            <p style="color: #8b949e; margin-bottom: 15px;">
-                {% if 'vanndom300' in user.email %}
-                    🎉 You are the OWNER! Unlimited access to all features forever!
-                {% elif tier_info and tier_info.is_admin %}
-                    🎉 You are the OWNER! Unlimited access to all features forever!
-                {% elif user.tier == 'premium' %}
-                    You have unlimited access to all features!
-                {% elif user.tier == 'pro' %}
-                    You have Pro access with 50 analyses per day.
-                {% else %}
-                    Upgrade to unlock more analyses and premium features.
-                {% endif %}
-            </p>
-            {% if 'vanndom300' not in user.email and not (tier_info and tier_info.is_admin) %}
-            <a href="/pricing" class="action-btn primary">
-                {% if user.tier == 'free' %}Upgrade Plan{% else %}Manage Subscription{% endif %}
-            </a>
+            {% set is_owner = 'vanndom300' in user.email %}
+            {% if is_owner %}
+            <p class="owner-msg">🎉 You are the OWNER! Unlimited access to all features forever!</p>
+            {% else %}
+            <p style="color: #8b949e; margin-bottom: 15px;">Upgrade to unlock more analyses and premium features.</p>
+            <a href="/pricing" class="action-btn btn-primary">Upgrade Plan</a>
             {% endif %}
         </div>
         
-        <!-- Account Actions -->
         <div class="settings-section">
             <div class="section-title">🔐 Account</div>
-            <a href="/auth/logout" class="action-btn danger">Logout</a>
+            <a href="/auth/logout" class="action-btn btn-danger">Logout</a>
         </div>
     </div>
 </body>
