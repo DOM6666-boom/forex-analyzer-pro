@@ -170,6 +170,17 @@
         <!-- Profile Section -->
         <div class="settings-section">
             <div class="section-title">👤 Profile</div>
+            
+            <!-- DEBUG INFO - Remove after testing -->
+            <div style="background: rgba(255,0,0,0.1); padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 0.75rem; color: #ff6b6b;">
+                <strong>DEBUG:</strong><br>
+                tier_info: {{ tier_info }}<br>
+                tier_info.tier: {{ tier_info.tier if tier_info else 'N/A' }}<br>
+                tier_info.is_admin: {{ tier_info.is_admin if tier_info else 'N/A' }}<br>
+                user.tier: {{ user.tier }}<br>
+                user.email: {{ user.email }}
+            </div>
+            
             <div class="profile-info">
                 <img src="{{ user.picture or 'https://ui-avatars.com/api/?name=' + (user.name or user.email)|urlencode + '&background=00d4ff&color=0a0a1a&size=80' }}" 
                      alt="Avatar" class="profile-avatar">
