@@ -2100,17 +2100,19 @@
                 <div class="form-group">
                     <label>Analysis Depth</label>
                     <div class="mode-toggle">
-                        <button type="button" class="mode-btn active" id="lightModeBtn" onclick="setAnalysisDepth('light')">⚡ Light (Fast)</button>
-                        <button type="button" class="mode-btn" id="fullModeBtn" onclick="setAnalysisDepth('full')">
+                        {% set is_owner = user and 'vanndom300' in user.email %}
+                        {% set is_paid = user and (user.tier == 'pro' or user.tier == 'premium') %}
+                        <button type="button" class="mode-btn{% if not is_owner and not is_paid %} active{% endif %}" id="lightModeBtn" onclick="setAnalysisDepth('light')">⚡ Light (Fast)</button>
+                        <button type="button" class="mode-btn{% if is_owner or is_paid %} active{% endif %}" id="fullModeBtn" onclick="setAnalysisDepth('full')">
                             🔬 Full (744 Concepts)
-                            {% if not user or (user and user.tier == 'free') %}
+                            {% if not is_owner and not is_paid %}
                             <span style="font-size: 0.6rem; color: #ffd700;">🔒 PRO</span>
                             {% endif %}
                         </button>
                     </div>
                     <div style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 5px;">
                         Light: ~1K tokens | Full: ~5K tokens
-                        {% if not user or (user and user.tier == 'free') %}
+                        {% if not is_owner and not is_paid %}
                         <span style="color: #ffd700;">(Full requires Pro/Premium)</span>
                         {% endif %}
                     </div>
@@ -2684,9 +2686,11 @@
             alert(`Selected ${symbol}! Now upload a chart screenshot to analyze.`);
         }
         
-        // User tier from server
+        // User tier from server - Check for owner by email
         const userTier = '{{ user.tier if user else "free" }}';
-        const canUseFullMode = (userTier === 'pro' || userTier === 'premium' || userTier === 'owner');
+        const userEmail = '{{ user.email if user else "" }}';
+        const isOwner = userEmail.includes('vanndom300');
+        const canUseFullMode = isOwner || (userTier === 'pro' || userTier === 'premium' || userTier === 'owner');
         
         function setAnalysisDepth(depth) {
             // Check if user can use Full mode
@@ -2706,8 +2710,14 @@
             }
         }
         
-        // Initialize to Light mode for Free users
-        if (!canUseFullMode) {
+        // Initialize: Owner/Pro/Premium can use Full mode, Free users use Light mode
+        if (canUseFullMode) {
+            // Default to Full mode for paid users and owner
+            lightMode = false;
+            document.getElementById('lightModeBtn').classList.remove('active');
+            document.getElementById('fullModeBtn').classList.add('active');
+        } else {
+            // Free users default to Light mode
             lightMode = true;
             document.getElementById('lightModeBtn').classList.add('active');
             document.getElementById('fullModeBtn').classList.remove('active');
