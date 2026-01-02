@@ -3236,9 +3236,16 @@ def history_page():
 @login_required
 def settings_page():
     """User settings page"""
-    user = get_current_user()
-    tier_info = get_user_tier_info(user['id'])
-    return render_template('settings.html', user=user, tier_info=tier_info)
+    try:
+        user = get_current_user()
+        if not user:
+            return redirect('/login')
+        tier_info = get_user_tier_info(user['id'])
+        return render_template('settings.html', user=user, tier_info=tier_info)
+    except Exception as e:
+        import traceback
+        print(f"[SETTINGS ERROR] {traceback.format_exc()}")
+        return f"<h1>Settings Error</h1><pre>{str(e)}</pre><br><a href='/'>Go Home</a>", 500
 
 
 @app.route('/api/history')
