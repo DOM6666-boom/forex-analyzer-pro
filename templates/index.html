@@ -2024,6 +2024,10 @@
         </div>
         
         <div class="main-grid">
+            <!-- Define user tier variables at the top for reuse -->
+            {% set is_owner = user and 'vanndom300' in user.email %}
+            {% set is_paid = user and (user.tier == 'pro' or user.tier == 'premium') %}
+            
             <div class="panel">
                 <h2 class="panel-title">📊 Chart Analysis</h2>
                 
@@ -2084,24 +2088,36 @@
                 
                 <div class="form-group">
                     <label>Timeframe</label>
-                    <select id="intervalSelect">
+                    <select id="intervalSelect" onchange="checkTimeframeAccess(this)">
                         <option value="1min">M1</option>
                         <option value="5min">M5</option>
                         <option value="15min">M15</option>
+                        {% if is_owner or is_paid %}
                         <option value="30min">M30</option>
                         <option value="1h" selected>H1</option>
                         <option value="4h">H4</option>
                         <option value="1day">D1</option>
                         <option value="1week">W1</option>
                         <option value="1month">MN</option>
+                        {% else %}
+                        <option value="30min" disabled>M30 🔒 PRO</option>
+                        <option value="1h" disabled>H1 🔒 PRO</option>
+                        <option value="4h" disabled>H4 🔒 PRO</option>
+                        <option value="1day" disabled>D1 🔒 PRO</option>
+                        <option value="1week" disabled>W1 🔒 PRO</option>
+                        <option value="1month" disabled>MN 🔒 PRO</option>
+                        {% endif %}
                     </select>
+                    {% if not is_owner and not is_paid %}
+                    <div style="font-size: 0.7rem; color: #ffd700; margin-top: 5px;">
+                        🔒 M30+ timeframes require Pro/Premium
+                    </div>
+                    {% endif %}
                 </div>
                 
                 <div class="form-group">
                     <label>Analysis Depth</label>
                     <div class="mode-toggle">
-                        {% set is_owner = user and 'vanndom300' in user.email %}
-                        {% set is_paid = user and (user.tier == 'pro' or user.tier == 'premium') %}
                         <button type="button" class="mode-btn{% if not is_owner and not is_paid %} active{% endif %}" id="lightModeBtn" onclick="setAnalysisDepth('light')">⚡ Light (Fast)</button>
                         <button type="button" class="mode-btn{% if is_owner or is_paid %} active{% endif %}" id="fullModeBtn" onclick="setAnalysisDepth('full')">
                             🔬 Full (744 Concepts)
