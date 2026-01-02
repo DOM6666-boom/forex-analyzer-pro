@@ -3271,8 +3271,11 @@
             }
         }
 
-        // Function to draw annotations on canvas
+        // Function to draw annotations on canvas - DISABLED
         function drawAnnotatedChart(imageBase64, annotations) {
+            // Chart markup disabled by request - only show signal card
+            return;
+            
             const container = document.getElementById('annotatedChartContainer');
             const canvas = document.getElementById('annotatedChart');
             const ctx = canvas.getContext('2d');
