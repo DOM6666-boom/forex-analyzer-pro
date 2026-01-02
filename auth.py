@@ -15,16 +15,19 @@ from functools import wraps
 from flask import session, redirect, url_for, request, jsonify
 
 # ========== DATABASE SETUP ==========
-# Use persistent disk on Render
+# Use persistent disk on Render if available, otherwise use local
 import os
+
+DB_PATH = 'forex_users.db'
 if os.environ.get('RENDER'):
-    # On Render - use persistent disk path
-    DB_DIR = '/opt/render/project/src/data'
-    os.makedirs(DB_DIR, exist_ok=True)
-    DB_PATH = os.path.join(DB_DIR, 'forex_users.db')
-else:
-    # Local development
-    DB_PATH = 'forex_users.db'
+    # Try persistent disk first
+    disk_path = '/opt/render/project/src/data'
+    if os.path.exists(disk_path) or os.access(os.path.dirname(disk_path), os.W_OK):
+        try:
+            os.makedirs(disk_path, exist_ok=True)
+            DB_PATH = os.path.join(disk_path, 'forex_users.db')
+        except:
+            DB_PATH = 'forex_users.db'
 
 print(f"[DATABASE] Using path: {DB_PATH}")
 

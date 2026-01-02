@@ -2596,6 +2596,10 @@ def analyze_visual():
     """Analyze chart and return visual annotations - requires authentication"""
     user = get_current_user()
     
+    # Handle case where user is None (session expired)
+    if not user:
+        return jsonify({'error': 'Session expired. Please login again.', 'redirect': '/login'}), 401
+    
     # Check analysis limit
     allowed, remaining = check_analysis_limit(user['id'])
     if not allowed:
