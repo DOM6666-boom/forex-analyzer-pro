@@ -1,6 +1,8 @@
 import os
 import base64
 import requests
+import sqlite3
+from datetime import datetime
 from flask import Flask, request, jsonify, render_template, redirect, url_for, session
 from groq import Groq
 from dotenv import load_dotenv
@@ -21,7 +23,7 @@ from auth import (
     get_user_by_email, get_user_by_id, create_user, update_user_login,
     update_user_google, check_analysis_limit, increment_analysis_count,
     save_analysis, get_user_history, upgrade_user_tier, get_user_tier_info,
-    login_required, get_current_user, verify_password, TIER_LIMITS
+    login_required, get_current_user, verify_password, TIER_LIMITS, DB_PATH
 )
 
 # Google Gemini Integration (FREE backup)
@@ -3379,6 +3381,157 @@ def api_history():
         return jsonify({'error': 'Session expired', 'redirect': '/login'}), 401
     history = get_user_history(user['id'], limit=50)
     return jsonify({'history': history})
+
+
+# ========== ABA/KHQR PAYMENT ROUTES ==========
+
+@app.route('/api/submit-payment', methods=['POST'])
+@login_required
+def submit_payment():
+    """Submit ABA/KHQR payment for verification"""
+    user = get_current_user()
+    if not user:
+        return jsonify({'error': 'Session expired', 'redirect': '/login'}), 401
+    
+    plan = request.form.get('plan', 'pro')
+    amount = request.form.get('amount', '19.99')
+    transaction_ref = request.form.get('transaction_ref', '')
+    screenshot = request.files.get('screenshot')
+    
+    # Save payment request to database
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        
+        # Create payment_requests table if not exists
+        c.execute('''
+            CREATE TABLE IF NOT EXISTS payment_requests (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER,
+                user_email TEXT,
+                plan TEXT,
+                amount REAL,
+                transaction_ref TEXT,
+                screenshot_path TEXT,
+                status TEXT DEFAULT 'pending',
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                approved_at TEXT,
+                approved_by TEXT,
+                FOREIGN KEY (user_id) REFERENCES users (id)
+            )
+        ''')
+        
+        # Save screenshot if provided
+        screenshot_path = None
+        if screenshot:
+            import os
+            upload_dir = 'payment_screenshots'
+            os.makedirs(upload_dir, exist_ok=True)
+            filename = f"{user['id']}_{plan}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
+            screenshot_path = os.path.join(upload_dir, filename)
+            screenshot.save(screenshot_path)
+        
+        # Insert payment request
+        c.execute('''
+            INSERT INTO payment_requests (user_id, user_email, plan, amount, transaction_ref, screenshot_path)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (user['id'], user['email'], plan, float(amount), transaction_ref, screenshot_path))
+        
+        conn.commit()
+        conn.close()
+        
+        print(f"[PAYMENT] New payment request from {user['email']} for {plan} plan - Ref: {transaction_ref}")
+        
+        return jsonify({'success': True, 'message': 'Payment submitted for verification'})
+    except Exception as e:
+        print(f"[PAYMENT ERROR] {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/admin/payments')
+@login_required
+def admin_payments():
+    """Admin page to view and approve payments"""
+    user = get_current_user()
+    if not user or 'vanndom300' not in user.get('email', ''):
+        return redirect('/')
+    
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    
+    # Get all pending payments
+    c.execute('SELECT * FROM payment_requests ORDER BY created_at DESC')
+    payments = [dict(row) for row in c.fetchall()]
+    conn.close()
+    
+    return render_template('admin_payments.html', payments=payments)
+
+
+@app.route('/admin/approve-payment/<int:payment_id>', methods=['POST'])
+@login_required
+def approve_payment(payment_id):
+    """Approve a payment and upgrade user"""
+    user = get_current_user()
+    if not user or 'vanndom300' not in user.get('email', ''):
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        c = conn.cursor()
+        
+        # Get payment request
+        c.execute('SELECT * FROM payment_requests WHERE id = ?', (payment_id,))
+        payment = c.fetchone()
+        
+        if not payment:
+            return jsonify({'error': 'Payment not found'}), 404
+        
+        # Update user tier
+        c.execute('UPDATE users SET tier = ? WHERE id = ?', (payment['plan'], payment['user_id']))
+        
+        # Update payment status
+        c.execute('''
+            UPDATE payment_requests 
+            SET status = 'approved', approved_at = ?, approved_by = ?
+            WHERE id = ?
+        ''', (datetime.now().isoformat(), user['email'], payment_id))
+        
+        # Add to subscriptions table
+        c.execute('''
+            INSERT OR REPLACE INTO subscriptions (user_id, tier, created_at)
+            VALUES (?, ?, ?)
+        ''', (payment['user_id'], payment['plan'], datetime.now().isoformat()))
+        
+        conn.commit()
+        conn.close()
+        
+        print(f"[PAYMENT APPROVED] User {payment['user_email']} upgraded to {payment['plan']}")
+        
+        return jsonify({'success': True, 'message': f"User upgraded to {payment['plan']}"})
+    except Exception as e:
+        print(f"[APPROVE ERROR] {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/admin/reject-payment/<int:payment_id>', methods=['POST'])
+@login_required
+def reject_payment(payment_id):
+    """Reject a payment request"""
+    user = get_current_user()
+    if not user or 'vanndom300' not in user.get('email', ''):
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        c.execute('UPDATE payment_requests SET status = ? WHERE id = ?', ('rejected', payment_id))
+        conn.commit()
+        conn.close()
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 
 # ========== STRIPE PAYMENT ROUTES ==========

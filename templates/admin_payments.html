@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Payment Requests</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a0a1a, #0d1117);
+            min-height: 100vh;
+            color: #e6edf3;
+            padding: 20px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 {
+            background: linear-gradient(135deg, #00d4ff, #00ff88);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 30px;
+        }
+        .back-btn {
+            display: inline-block;
+            color: #8b949e;
+            text-decoration: none;
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+        }
+        .back-btn:hover { color: #00d4ff; }
+        
+        .payment-card {
+            background: rgba(22, 27, 34, 0.8);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .payment-card.pending { border-left: 4px solid #ffd700; }
+        .payment-card.approved { border-left: 4px solid #00ff88; }
+        .payment-card.rejected { border-left: 4px solid #ff4757; }
+        
+        .payment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .payment-email { font-weight: 600; font-size: 1.1rem; }
+        .payment-plan {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .payment-plan.pro { background: rgba(0, 212, 255, 0.2); color: #00d4ff; }
+        .payment-plan.premium { background: rgba(255, 215, 0, 0.2); color: #ffd700; }
+        
+        .payment-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .detail-item { color: #8b949e; font-size: 0.9rem; }
+        .detail-item span { color: #e6edf3; font-weight: 500; }
+        
+        .payment-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .btn {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-approve { background: linear-gradient(135deg, #00d4ff, #00ff88); color: #0a0a1a; }
+        .btn-approve:hover { transform: translateY(-2px); }
+        .btn-reject { background: rgba(255, 71, 87, 0.2); color: #ff4757; border: 1px solid rgba(255, 71, 87, 0.3); }
+        .btn-reject:hover { background: rgba(255, 71, 87, 0.3); }
+        
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .status-pending { background: rgba(255, 215, 0, 0.2); color: #ffd700; }
+        .status-approved { background: rgba(0, 255, 136, 0.2); color: #00ff88; }
+        .status-rejected { background: rgba(255, 71, 87, 0.2); color: #ff4757; }
+        
+        .screenshot-link {
+            color: #00d4ff;
+            text-decoration: none;
+        }
+        .screenshot-link:hover { text-decoration: underline; }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px;
+            color: #6e7681;
+        }
+        .empty-state-icon { font-size: 4rem; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-btn">← Back to Analyzer</a>
+        <h1>💳 Payment Requests</h1>
+        
+        {% if payments %}
+            {% for payment in payments %}
+            <div class="payment-card {{ payment.status }}">
+                <div class="payment-header">
+                    <div>
+                        <div class="payment-email">{{ payment.user_email }}</div>
+                        <div style="color: #6e7681; font-size: 0.85rem;">User ID: {{ payment.user_id }}</div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <span class="payment-plan {{ payment.plan }}">{{ payment.plan|upper }}</span>
+                        <span class="status-badge status-{{ payment.status }}">{{ payment.status|upper }}</span>
+                    </div>
+                </div>
+                
+                <div class="payment-details">
+                    <div class="detail-item">Amount: <span>${{ payment.amount }}</span></div>
+                    <div class="detail-item">Transaction Ref: <span>{{ payment.transaction_ref or 'N/A' }}</span></div>
+                    <div class="detail-item">Date: <span>{{ payment.created_at[:16] if payment.created_at else 'N/A' }}</span></div>
+                    {% if payment.screenshot_path %}
+                    <div class="detail-item">Screenshot: <a href="/{{ payment.screenshot_path }}" target="_blank" class="screenshot-link">View 📷</a></div>
+                    {% endif %}
+                </div>
+                
+                {% if payment.status == 'pending' %}
+                <div class="payment-actions">
+                    <button class="btn btn-approve" onclick="approvePayment({{ payment.id }})">✅ Approve & Upgrade</button>
+                    <button class="btn btn-reject" onclick="rejectPayment({{ payment.id }})">❌ Reject</button>
+                </div>
+                {% elif payment.status == 'approved' %}
+                <div style="color: #00ff88; font-size: 0.9rem;">
+                    ✅ Approved on {{ payment.approved_at[:16] if payment.approved_at else 'N/A' }} by {{ payment.approved_by or 'Admin' }}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">📭</div>
+                <h3>No Payment Requests</h3>
+                <p>Payment requests will appear here when users submit them.</p>
+            </div>
+        {% endif %}
+    </div>
+    
+    <script>
+        async function approvePayment(paymentId) {
+            if (!confirm('Approve this payment and upgrade user?')) return;
+            
+            try {
+                const response = await fetch(`/admin/approve-payment/${paymentId}`, { method: 'POST' });
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('✅ Payment approved! User has been upgraded.');
+                    location.reload();
+                } else {
+                    alert('❌ Error: ' + data.error);
+                }
+            } catch (error) {
+                alert('❌ Network error');
+            }
+        }
+        
+        async function rejectPayment(paymentId) {
+            if (!confirm('Reject this payment request?')) return;
+            
+            try {
+                const response = await fetch(`/admin/reject-payment/${paymentId}`, { method: 'POST' });
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Payment rejected.');
+                    location.reload();
+                } else {
+                    alert('❌ Error: ' + data.error);
+                }
+            } catch (error) {
+                alert('❌ Network error');
+            }
+        }
+    </script>
+</body>
+</html>
