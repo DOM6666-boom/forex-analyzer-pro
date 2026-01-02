@@ -170,29 +170,23 @@
         <!-- Profile Section -->
         <div class="settings-section">
             <div class="section-title">👤 Profile</div>
-            
-            <!-- DEBUG INFO - Remove after testing -->
-            <div style="background: rgba(255,0,0,0.1); padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 0.75rem; color: #ff6b6b;">
-                <strong>DEBUG:</strong><br>
-                tier_info: {{ tier_info }}<br>
-                tier_info.tier: {{ tier_info.tier if tier_info else 'N/A' }}<br>
-                tier_info.is_admin: {{ tier_info.is_admin if tier_info else 'N/A' }}<br>
-                user.tier: {{ user.tier }}<br>
-                user.email: {{ user.email }}
-            </div>
-            
             <div class="profile-info">
                 <img src="{{ user.picture or 'https://ui-avatars.com/api/?name=' + (user.name or user.email)|urlencode + '&background=00d4ff&color=0a0a1a&size=80' }}" 
                      alt="Avatar" class="profile-avatar">
                 <div class="profile-details">
                     <h3>{{ user.name or user.email.split('@')[0] }}</h3>
                     <p>{{ user.email }}</p>
-                    <span class="tier-badge {{ tier_info.tier if tier_info else user.tier }}">
-                        {% if tier_info and tier_info.is_admin %}👑 OWNER
-                        {% elif user.tier == 'premium' %}👑 PREMIUM
-                        {% elif user.tier == 'pro' %}⭐ PRO
-                        {% else %}FREE{% endif %}
-                    </span>
+                    {% if 'vanndom300' in user.email %}
+                    <span class="tier-badge owner">👑 OWNER</span>
+                    {% elif tier_info and tier_info.is_admin %}
+                    <span class="tier-badge owner">👑 OWNER</span>
+                    {% elif user.tier == 'premium' %}
+                    <span class="tier-badge premium">👑 PREMIUM</span>
+                    {% elif user.tier == 'pro' %}
+                    <span class="tier-badge pro">⭐ PRO</span>
+                    {% else %}
+                    <span class="tier-badge free">FREE</span>
+                    {% endif %}
                 </div>
             </div>
             <div class="info-row">
@@ -231,7 +225,9 @@
                 <div class="usage-text">
                     <span>Daily Usage</span>
                     <span>
-                        {% if tier_info and tier_info.is_admin %}
+                        {% if 'vanndom300' in user.email %}
+                            Unlimited
+                        {% elif tier_info and tier_info.is_admin %}
                             Unlimited
                         {% elif tier_info and tier_info.limits %}
                             {{ tier_info.analyses_today or 0 }} / {{ tier_info.limits.analyses_per_day or 5 }}
@@ -240,7 +236,7 @@
                         {% endif %}
                     </span>
                 </div>
-                {% if tier_info and tier_info.is_admin %}
+                {% if 'vanndom300' in user.email or (tier_info and tier_info.is_admin) %}
                 <div class="usage-bar">
                     <div class="usage-fill" style="width: 100%; background: linear-gradient(90deg, #ffd700, #ff6b00);"></div>
                 </div>
@@ -262,7 +258,9 @@
         <div class="settings-section">
             <div class="section-title">💎 Subscription</div>
             <p style="color: #8b949e; margin-bottom: 15px;">
-                {% if tier_info and tier_info.is_admin %}
+                {% if 'vanndom300' in user.email %}
+                    🎉 You are the OWNER! Unlimited access to all features forever!
+                {% elif tier_info and tier_info.is_admin %}
                     🎉 You are the OWNER! Unlimited access to all features forever!
                 {% elif user.tier == 'premium' %}
                     You have unlimited access to all features!
@@ -272,7 +270,7 @@
                     Upgrade to unlock more analyses and premium features.
                 {% endif %}
             </p>
-            {% if not (tier_info and tier_info.is_admin) %}
+            {% if 'vanndom300' not in user.email and not (tier_info and tier_info.is_admin) %}
             <a href="/pricing" class="action-btn primary">
                 {% if user.tier == 'free' %}Upgrade Plan{% else %}Manage Subscription{% endif %}
             </a>
