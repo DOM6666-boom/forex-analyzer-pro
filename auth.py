@@ -204,21 +204,28 @@ def check_analysis_limit(user_id):
     limit = TIER_LIMITS.get(tier, TIER_LIMITS['free'])['analyses_per_day']
     
     today = datetime.now().strftime('%Y-%m-%d')
-    last_date = user.get('last_analysis_date', '')
+    last_date = user.get('last_analysis_date', '') or ''
+    analyses_today = user.get('analyses_today', 0) or 0
     
+    print(f"[LIMIT CHECK] User: {user_email}, Tier: {tier}, Today: {today}, Last: {last_date}, Count: {analyses_today}, Limit: {limit}")
+    
+    # Only reset if it's a NEW day
     if last_date != today:
+        print(f"[LIMIT CHECK] New day detected - resetting count from {analyses_today} to 0")
         conn = sqlite3.connect(DB_PATH)
         c = conn.cursor()
         c.execute('UPDATE users SET analyses_today = 0, last_analysis_date = ? WHERE id = ?', (today, user_id))
         conn.commit()
         conn.close()
-        return True, limit
+        analyses_today = 0  # Reset local variable too
     
-    analyses_today = user.get('analyses_today', 0)
     if analyses_today >= limit:
+        print(f"[LIMIT CHECK] BLOCKED - {analyses_today} >= {limit}")
         return False, f"Daily limit reached ({limit} analyses). Upgrade to Pro for more!"
     
-    return True, limit - analyses_today
+    remaining = limit - analyses_today
+    print(f"[LIMIT CHECK] ALLOWED - {remaining} remaining")
+    return True, remaining
 
 def increment_analysis_count(user_id):
     today = datetime.now().strftime('%Y-%m-%d')
