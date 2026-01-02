@@ -2175,13 +2175,16 @@
         let lightMode = false;
         const mtfFiles = { M15: null, M30: null, H1: null, H4: null, D1: null };
         
-        // Global variable to track login status
-        let isUserLoggedIn = false;
+        // Global variable to track login status - Initialize from server-side session
+        let isUserLoggedIn = {{ 'true' if user else 'false' }};
         
         // ========== ANALYZE FUNCTION (called by button onclick) ==========
         async function analyzeChart() {
-            // Don't check login on client - let server handle it
-            // Server will return 401 if not logged in
+            // Check login status first - redirect to login if not logged in
+            if (!isUserLoggedIn) {
+                window.location.href = '/login';
+                return;
+            }
             
             if (!selectedFile) {
                 alert('Please upload a chart image first');
@@ -2216,20 +2219,10 @@
                 // Check if response is JSON
                 const contentType = response.headers.get('content-type');
                 if (!contentType || !contentType.includes('application/json')) {
-                    // Not JSON - probably login redirect
+                    // Not JSON - probably login redirect or server error
                     if (response.status === 401 || response.redirected) {
-                        analysisContent.innerHTML = `
-                            <div class="error" style="text-align: center; padding: 30px;">
-                                <div style="font-size: 3rem; margin-bottom: 15px;">🔐</div>
-                                <h3 style="color: #ff4757; margin-bottom: 10px;">Login Required</h3>
-                                <p style="color: #8b949e; margin-bottom: 20px;">Please login to analyze charts</p>
-                                <a href="/login" style="display: inline-block; background: linear-gradient(135deg, #00d4ff, #00ff88); color: #0a0a1a; padding: 12px 24px; border-radius: 10px; text-decoration: none; font-weight: 700;">
-                                    🔐 Login Now
-                                </a>
-                            </div>
-                        `;
-                        signalCard.innerHTML = '';
-                        resultPanel.style.display = 'block';
+                        // Session expired - redirect to login
+                        window.location.href = '/login?error=' + encodeURIComponent('Session expired. Please login again.');
                         return;
                     }
                     throw new Error('Server returned non-JSON response');
@@ -2237,20 +2230,9 @@
                 
                 const data = await response.json();
                 
-                // Handle login required
+                // Handle 401 - session expired, redirect to login
                 if (response.status === 401) {
-                    analysisContent.innerHTML = `
-                        <div class="error" style="text-align: center; padding: 30px;">
-                            <div style="font-size: 3rem; margin-bottom: 15px;">🔐</div>
-                            <h3 style="color: #ff4757; margin-bottom: 10px;">Login Required</h3>
-                            <p style="color: #8b949e; margin-bottom: 20px;">${data.error || 'Please login to analyze charts'}</p>
-                            <a href="/login" style="display: inline-block; background: linear-gradient(135deg, #00d4ff, #00ff88); color: #0a0a1a; padding: 12px 24px; border-radius: 10px; text-decoration: none; font-weight: 700;">
-                                🔐 Login Now
-                            </a>
-                        </div>
-                    `;
-                    signalCard.innerHTML = '';
-                    resultPanel.style.display = 'block';
+                    window.location.href = '/login?error=' + encodeURIComponent(data.error || 'Session expired. Please login again.');
                     return;
                 }
                 
@@ -3505,7 +3487,12 @@
         }
 
         analyzeBtn.addEventListener('click', async () => {
-            // Don't check login on client - server will handle it
+            // Check login status first - redirect to login if not logged in
+            if (!isUserLoggedIn) {
+                window.location.href = '/login';
+                return;
+            }
+            
             if (!selectedFile) return;
             
             analyzeBtn.disabled = true;
@@ -3611,6 +3598,12 @@
         });
 
         analyzeMtfBtn.addEventListener('click', async () => {
+            // Check login status first - redirect to login if not logged in
+            if (!isUserLoggedIn) {
+                window.location.href = '/login';
+                return;
+            }
+            
             const uploadedTfs = Object.entries(mtfFiles).filter(([tf, file]) => file !== null);
             if (uploadedTfs.length < 2) {
                 alert('Please upload at least 2 timeframe charts');
