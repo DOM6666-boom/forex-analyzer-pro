@@ -219,16 +219,29 @@
             <div style="margin-top: 25px;">
                 <div class="usage-text">
                     <span>Daily Usage</span>
-                    <span>{% if tier_info and tier_info.is_admin %}Unlimited{% else %}{{ tier_info.analyses_today if tier_info else 0 }} / {{ tier_info.limits.analyses_per_day if tier_info else 5 }}{% endif %}</span>
+                    <span>
+                        {% if tier_info and tier_info.is_admin %}
+                            Unlimited
+                        {% elif tier_info and tier_info.limits %}
+                            {{ tier_info.analyses_today or 0 }} / {{ tier_info.limits.analyses_per_day or 5 }}
+                        {% else %}
+                            0 / 5
+                        {% endif %}
+                    </span>
                 </div>
                 {% if tier_info and tier_info.is_admin %}
                 <div class="usage-bar">
                     <div class="usage-fill" style="width: 100%; background: linear-gradient(90deg, #ffd700, #ff6b00);"></div>
                 </div>
-                {% else %}
-                {% set usage_percent = ((tier_info.analyses_today or 0) / (tier_info.limits.analyses_per_day or 5) * 100) if tier_info else 0 %}
+                {% elif tier_info and tier_info.limits %}
+                {% set daily_limit = tier_info.limits.analyses_per_day or 5 %}
+                {% set usage_percent = ((tier_info.analyses_today or 0) / daily_limit * 100) %}
                 <div class="usage-bar">
                     <div class="usage-fill" style="width: {{ usage_percent|int }}%"></div>
+                </div>
+                {% else %}
+                <div class="usage-bar">
+                    <div class="usage-fill" style="width: 0%"></div>
                 </div>
                 {% endif %}
             </div>
