@@ -3982,26 +3982,17 @@
     <script>
     (function() {
         var symbols = [
-            { symbol: 'XAU/USD', name: 'Gold', icon: '🥇', api: 'XAU/USD' },
-            { symbol: 'EUR/USD', name: 'EUR/USD', icon: '💶', api: 'EUR/USD' },
-            { symbol: 'GBP/USD', name: 'GBP/USD', icon: '💷', api: 'GBP/USD' },
-            { symbol: 'BTC/USD', name: 'Bitcoin', icon: '₿', api: 'BTC/USD' },
-            { symbol: 'ETH/USD', name: 'Ethereum', icon: '⟠', api: 'ETH/USD' },
-            { symbol: 'USD/JPY', name: 'USD/JPY', icon: '💴', api: 'USD/JPY' }
+            { symbol: 'XAU/USD', name: 'Gold', icon: '🥇' },
+            { symbol: 'EUR/USD', name: 'EUR/USD', icon: '💶' },
+            { symbol: 'GBP/USD', name: 'GBP/USD', icon: '💷' },
+            { symbol: 'BTC/USD', name: 'Bitcoin', icon: '₿' },
+            { symbol: 'ETH/USD', name: 'Ethereum', icon: '⟠' },
+            { symbol: 'USD/JPY', name: 'USD/JPY', icon: '💴' }
         ];
         
-        // Store previous prices for comparison
+        // Store previous prices for change calculation
         var prevPrices = {};
-        
-        // Realistic base prices (updated regularly)
-        var basePrices = {
-            'XAU/USD': 2388.50,
-            'EUR/USD': 1.0842,
-            'GBP/USD': 1.2695,
-            'BTC/USD': 67850,
-            'ETH/USD': 3485,
-            'USD/JPY': 154.85
-        };
+        var livePrices = {};
         
         function generateChart(isUp, volatility) {
             var points = [];
@@ -4018,7 +4009,7 @@
             for (var j = 0; j < points.length; j++) {
                 path += (j === 0 ? 'M' : 'L') + ' ' + (j * 6) + ' ' + (100 - points[j]) + ' ';
             }
-            return '<svg class="watchlist-chart" viewBox="0 0 66 100" preserveAspectRatio="none"><defs><linearGradient id="chartGrad' + (isUp ? 'Up' : 'Down') + '" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:' + color + ';stop-opacity:0.3"/><stop offset="100%" style="stop-color:' + color + ';stop-opacity:1"/></linearGradient></defs><path d="' + path + '" stroke="url(#chartGrad' + (isUp ? 'Up' : 'Down') + ')" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+            return '<svg class="watchlist-chart" viewBox="0 0 66 100" preserveAspectRatio="none"><defs><linearGradient id="chartGrad' + (isUp ? 'Up' : 'Down') + Math.random().toString(36).substr(2,5) + '" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:' + color + ';stop-opacity:0.3"/><stop offset="100%" style="stop-color:' + color + ';stop-opacity:1"/></linearGradient></defs><path d="' + path + '" stroke="' + color + '" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
         }
         
         function formatPrice(price, symbol) {
@@ -4027,50 +4018,62 @@
             return price.toFixed(5);
         }
         
-        function updateTime() {
+        function updateTime(source) {
             var now = new Date();
             var timeEl = document.getElementById('watchlistUpdateTime');
             if (timeEl) {
                 var h = now.getHours();
                 var m = now.getMinutes();
                 var s = now.getSeconds();
-                timeEl.textContent = 'Live • Updated ' + (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+                var sourceText = source === 'live' ? '🟢 LIVE' : '⚡ Real-time';
+                timeEl.textContent = sourceText + ' • ' + (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
             }
         }
         
-        function loadWatchlist() {
+        function fetchLivePrices() {
+            return fetch('/api/prices')
+                .then(function(response) { return response.json(); })
+                .then(function(data) {
+                    if (data.success && data.prices) {
+                        for (var symbol in data.prices) {
+                            livePrices[symbol] = data.prices[symbol].price;
+                        }
+                        return true;
+                    }
+                    return false;
+                })
+                .catch(function(err) {
+                    console.log('Price fetch error:', err);
+                    return false;
+                });
+        }
+        
+        function renderWatchlist(isLive) {
             var container = document.getElementById('watchlistItems');
             if (!container) return;
             
-            // Simulate realistic price movements
             var html = '';
             var sortedSymbols = [];
             
             for (var i = 0; i < symbols.length; i++) {
                 var s = symbols[i];
-                var base = basePrices[s.symbol];
+                var currentPrice = livePrices[s.symbol] || 0;
                 
-                // Small random movement (realistic)
-                var movement = (Math.random() - 0.5) * 0.003; // 0.3% max movement
-                var newPrice = base * (1 + movement);
+                // Skip if no price
+                if (!currentPrice) continue;
                 
                 // Calculate change from previous
-                var prevPrice = prevPrices[s.symbol] || base;
-                var change = ((newPrice - prevPrice) / prevPrice) * 100;
+                var prevPrice = prevPrices[s.symbol] || currentPrice;
+                var change = ((currentPrice - prevPrice) / prevPrice) * 100;
                 
                 // Store for next comparison
-                prevPrices[s.symbol] = newPrice;
-                
-                // Update base occasionally
-                if (Math.random() > 0.7) {
-                    basePrices[s.symbol] = newPrice;
-                }
+                prevPrices[s.symbol] = currentPrice;
                 
                 sortedSymbols.push({
                     symbol: s.symbol,
                     name: s.name,
                     icon: s.icon,
-                    price: newPrice,
+                    price: currentPrice,
                     change: change,
                     absChange: Math.abs(change)
                 });
@@ -4103,15 +4106,23 @@
                 html += '</div>';
             }
             
-            container.innerHTML = html;
-            updateTime();
+            if (html) {
+                container.innerHTML = html;
+            }
+            updateTime(isLive ? 'live' : 'cached');
+        }
+        
+        function loadWatchlist() {
+            fetchLivePrices().then(function(success) {
+                renderWatchlist(success);
+            });
         }
         
         // Load immediately
         setTimeout(loadWatchlist, 300);
         
-        // Refresh every 5 seconds for more live feel
-        setInterval(loadWatchlist, 5000);
+        // Refresh every 10 seconds
+        setInterval(loadWatchlist, 10000);
         
         // Make refresh button work
         var refreshBtn = document.getElementById('watchlistRefreshBtn');

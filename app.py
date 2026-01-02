@@ -2430,6 +2430,86 @@ def logout():
     return redirect('/login?success=You have been logged out')
 
 
+# ========== LIVE MARKET PRICES API ==========
+@app.route('/api/prices')
+def get_live_prices():
+    """Get live market prices from Twelve Data API"""
+    try:
+        twelve_data_key = os.getenv('TWELVE_DATA_KEY', '')
+        
+        # Symbols to fetch
+        symbols_map = {
+            'XAU/USD': 'XAU/USD',
+            'EUR/USD': 'EUR/USD', 
+            'GBP/USD': 'GBP/USD',
+            'USD/JPY': 'USD/JPY',
+            'BTC/USD': 'BTC/USD',
+            'ETH/USD': 'ETH/USD'
+        }
+        
+        prices = {}
+        
+        if twelve_data_key:
+            # Fetch from Twelve Data API
+            symbols_str = ','.join(symbols_map.values())
+            url = f'https://api.twelvedata.com/price?symbol={symbols_str}&apikey={twelve_data_key}'
+            
+            try:
+                response = requests.get(url, timeout=5)
+                if response.status_code == 200:
+                    data = response.json()
+                    
+                    for symbol in symbols_map.keys():
+                        api_symbol = symbols_map[symbol]
+                        if api_symbol in data and 'price' in data[api_symbol]:
+                            prices[symbol] = {
+                                'price': float(data[api_symbol]['price']),
+                                'source': 'twelvedata'
+                            }
+            except Exception as e:
+                print(f"Twelve Data error: {e}")
+        
+        # Fallback: Try Binance for crypto
+        if 'BTC/USD' not in prices:
+            try:
+                btc_resp = requests.get('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT', timeout=3)
+                if btc_resp.status_code == 200:
+                    prices['BTC/USD'] = {'price': float(btc_resp.json()['price']), 'source': 'binance'}
+            except:
+                pass
+                
+        if 'ETH/USD' not in prices:
+            try:
+                eth_resp = requests.get('https://api.binance.com/api/v3/ticker/price?symbol=ETHUSDT', timeout=3)
+                if eth_resp.status_code == 200:
+                    prices['ETH/USD'] = {'price': float(eth_resp.json()['price']), 'source': 'binance'}
+            except:
+                pass
+        
+        # Fallback prices if API fails
+        fallback = {
+            'XAU/USD': 2388.50,
+            'EUR/USD': 1.0842,
+            'GBP/USD': 1.2695,
+            'USD/JPY': 154.85,
+            'BTC/USD': 67850,
+            'ETH/USD': 3485
+        }
+        
+        for symbol, default_price in fallback.items():
+            if symbol not in prices:
+                prices[symbol] = {'price': default_price, 'source': 'fallback'}
+        
+        return jsonify({
+            'success': True,
+            'prices': prices,
+            'timestamp': __import__('datetime').datetime.utcnow().isoformat()
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
 @app.route('/api/user')
 def get_user_info():
     """Get current user info"""
