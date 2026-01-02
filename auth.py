@@ -79,6 +79,11 @@ def init_db():
 # Initialize on import
 init_db()
 
+# ========== ADMIN EMAILS (UNLIMITED ACCESS) ==========
+ADMIN_EMAILS = [
+    'vanndom300@gmail.com',  # Owner - Unlimited access
+]
+
 # ========== TIER LIMITS ==========
 TIER_LIMITS = {
     'free': {
