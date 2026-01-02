@@ -15,7 +15,18 @@ from functools import wraps
 from flask import session, redirect, url_for, request, jsonify
 
 # ========== DATABASE SETUP ==========
-DB_PATH = 'forex_users.db'
+# Use persistent disk on Render
+import os
+if os.environ.get('RENDER'):
+    # On Render - use persistent disk path
+    DB_DIR = '/opt/render/project/src/data'
+    os.makedirs(DB_DIR, exist_ok=True)
+    DB_PATH = os.path.join(DB_DIR, 'forex_users.db')
+else:
+    # Local development
+    DB_PATH = 'forex_users.db'
+
+print(f"[DATABASE] Using path: {DB_PATH}")
 
 def init_db():
     """Initialize the user database"""
