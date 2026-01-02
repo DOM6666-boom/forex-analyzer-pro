@@ -230,21 +230,26 @@
         <!-- Payment Methods Info -->
         <div style="background: rgba(22, 27, 34, 0.8); border-radius: 20px; padding: 30px; margin-bottom: 40px; border: 1px solid rgba(0, 212, 255, 0.2);">
             <h3 style="text-align: center; color: #00d4ff; margin-bottom: 20px; font-size: 1.3rem;">💳 Payment Methods</h3>
-            <div style="display: flex; justify-content: center; gap: 30px; flex-wrap: wrap;">
-                <div style="text-align: center; padding: 15px 25px; background: rgba(0, 82, 180, 0.1); border-radius: 12px; border: 1px solid rgba(0, 82, 180, 0.3);">
+            <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+                <div style="text-align: center; padding: 15px 20px; background: rgba(0, 82, 180, 0.1); border-radius: 12px; border: 1px solid rgba(0, 82, 180, 0.3);">
                     <div style="font-size: 2rem; margin-bottom: 5px;">🏦</div>
                     <div style="font-weight: 600; color: #00d4ff;">ABA Bank</div>
-                    <div style="font-size: 0.8rem; color: #8b949e;">KHQR Supported</div>
+                    <div style="font-size: 0.75rem; color: #8b949e;">KHQR</div>
                 </div>
-                <div style="text-align: center; padding: 15px 25px; background: rgba(0, 255, 136, 0.1); border-radius: 12px; border: 1px solid rgba(0, 255, 136, 0.3);">
-                    <div style="font-size: 2rem; margin-bottom: 5px;">📱</div>
+                <div style="text-align: center; padding: 15px 20px; background: rgba(0, 128, 0, 0.1); border-radius: 12px; border: 1px solid rgba(0, 128, 0, 0.3);">
+                    <div style="font-size: 2rem; margin-bottom: 5px;">🏛️</div>
+                    <div style="font-weight: 600; color: #00ff88;">ACLEDA</div>
+                    <div style="font-size: 0.75rem; color: #8b949e;">KHQR</div>
+                </div>
+                <div style="text-align: center; padding: 15px 20px; background: rgba(0, 255, 136, 0.1); border-radius: 12px; border: 1px solid rgba(0, 255, 136, 0.3);">
+                    <div style="font-size: 2rem; margin-bottom: 5px;">�</divv>
                     <div style="font-weight: 600; color: #00ff88;">KHQR</div>
-                    <div style="font-size: 0.8rem; color: #8b949e;">All Banks</div>
+                    <div style="font-size: 0.75rem; color: #8b949e;">All Banks</div>
                 </div>
-                <div style="text-align: center; padding: 15px 25px; background: rgba(139, 92, 246, 0.1); border-radius: 12px; border: 1px solid rgba(139, 92, 246, 0.3);">
+                <div style="text-align: center; padding: 15px 20px; background: rgba(139, 92, 246, 0.1); border-radius: 12px; border: 1px solid rgba(139, 92, 246, 0.3);">
                     <div style="font-size: 2rem; margin-bottom: 5px;">💳</div>
                     <div style="font-weight: 600; color: #a855f7;">Wing</div>
-                    <div style="font-size: 0.8rem; color: #8b949e;">Transfer</div>
+                    <div style="font-size: 0.75rem; color: #8b949e;">Transfer</div>
                 </div>
             </div>
         </div>
@@ -278,24 +283,33 @@
             </div>
             
             <!-- Bank Details -->
-            <div style="background: rgba(0, 212, 255, 0.1); border-radius: 12px; padding: 15px; margin-bottom: 20px; border: 1px solid rgba(0, 212, 255, 0.2);">
-                <div style="font-weight: 600; color: #00d4ff; margin-bottom: 10px;">🏦 Bank Transfer Details:</div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                    <span style="color: #8b949e;">Bank:</span>
-                    <span style="color: #e6edf3; font-weight: 600;">ABA Bank</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                    <span style="color: #8b949e;">Account Name:</span>
+            <div style="background: rgba(0, 212, 255, 0.1); border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid rgba(0, 212, 255, 0.2);">
+                <div style="font-weight: 600; color: #00d4ff; margin-bottom: 10px;">🏦 ABA Bank:</div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                    <span style="color: #8b949e; font-size: 0.9rem;">Account Name:</span>
                     <span style="color: #e6edf3; font-weight: 600;">VANN DOM</span>
                 </div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                    <span style="color: #8b949e;">Account Number:</span>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: #8b949e; font-size: 0.9rem;">Account Number:</span>
                     <span style="color: #00ff88; font-weight: 600; cursor: pointer;" onclick="copyToClipboard('001747168')">001747168 📋</span>
                 </div>
-                <div style="display: flex; justify-content: space-between;">
-                    <span style="color: #8b949e;">Amount:</span>
-                    <span style="color: #ffd700; font-weight: 700;" id="modalAmountUSD">$19.99</span>
+            </div>
+            
+            <div style="background: rgba(0, 128, 0, 0.1); border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid rgba(0, 128, 0, 0.2);">
+                <div style="font-weight: 600; color: #00ff88; margin-bottom: 10px;">🏛️ ACLEDA Bank:</div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                    <span style="color: #8b949e; font-size: 0.9rem;">Account Name:</span>
+                    <span style="color: #e6edf3; font-weight: 600;">VANN DOM</span>
                 </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: #8b949e; font-size: 0.9rem;">Account Number:</span>
+                    <span style="color: #00ff88; font-weight: 600; cursor: pointer;" onclick="copyToClipboard('YOUR_ACLEDA_NUMBER')">YOUR_ACLEDA_NUMBER 📋</span>
+                </div>
+            </div>
+            
+            <div style="background: rgba(255, 215, 0, 0.1); border-radius: 12px; padding: 12px; margin-bottom: 20px; border: 1px solid rgba(255, 215, 0, 0.2); text-align: center;">
+                <span style="color: #ffd700; font-weight: 600;">💰 Amount: </span>
+                <span style="color: #ffd700; font-weight: 700; font-size: 1.1rem;" id="modalAmountUSD">$19.99</span>
             </div>
             
             <!-- Payment Confirmation Form -->
