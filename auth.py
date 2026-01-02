@@ -252,6 +252,72 @@ def get_user_history(user_id, limit=20):
     conn.close()
     return history
 
+def get_subscription_history(user_id):
+    """Get user's subscription/upgrade history"""
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    c.execute('SELECT * FROM subscriptions WHERE user_id = ? ORDER BY created_at DESC', (user_id,))
+    subs = [dict(row) for row in c.fetchall()]
+    conn.close()
+    return subs
+
+def get_user_full_stats(user_id):
+    """Get comprehensive user statistics"""
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    
+    # Get total analyses count
+    c.execute('SELECT COUNT(*) as count FROM analysis_history WHERE user_id = ?', (user_id,))
+    total_from_history = c.fetchone()['count']
+    
+    # Get analyses by signal type
+    c.execute('''
+        SELECT signal_type, COUNT(*) as count 
+        FROM analysis_history 
+        WHERE user_id = ? 
+        GROUP BY signal_type
+    ''', (user_id,))
+    by_signal = {row['signal_type']: row['count'] for row in c.fetchall()}
+    
+    # Get analyses by symbol (top 5)
+    c.execute('''
+        SELECT symbol, COUNT(*) as count 
+        FROM analysis_history 
+        WHERE user_id = ? 
+        GROUP BY symbol 
+        ORDER BY count DESC 
+        LIMIT 5
+    ''', (user_id,))
+    top_symbols = [{'symbol': row['symbol'], 'count': row['count']} for row in c.fetchall()]
+    
+    # Get this week's analyses
+    c.execute('''
+        SELECT COUNT(*) as count 
+        FROM analysis_history 
+        WHERE user_id = ? AND created_at >= date('now', '-7 days')
+    ''', (user_id,))
+    this_week = c.fetchone()['count']
+    
+    # Get this month's analyses
+    c.execute('''
+        SELECT COUNT(*) as count 
+        FROM analysis_history 
+        WHERE user_id = ? AND created_at >= date('now', '-30 days')
+    ''', (user_id,))
+    this_month = c.fetchone()['count']
+    
+    conn.close()
+    
+    return {
+        'total_from_history': total_from_history,
+        'by_signal': by_signal,
+        'top_symbols': top_symbols,
+        'this_week': this_week,
+        'this_month': this_month
+    }
+
 # ========== SUBSCRIPTION MANAGEMENT ==========
 def upgrade_user_tier(user_id, tier):
     if tier not in TIER_LIMITS:

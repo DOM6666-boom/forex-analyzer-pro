@@ -203,6 +203,7 @@
             border: 1px solid var(--border-color);
             box-shadow: var(--shadow-glow);
             position: relative;
+            z-index: 100;
         }
         
         .header-left {
@@ -990,6 +991,77 @@
             overflow-y: auto;
             overflow-x: hidden;
             scroll-behavior: smooth;
+            position: relative;
+        }
+        
+        /* Premium Aurora Background for Analysis Result */
+        .result-panel.aurora-active {
+            background: 
+                linear-gradient(135deg, rgba(10, 10, 26, 0.95) 0%, rgba(13, 17, 23, 0.95) 100%);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            box-shadow: 
+                0 0 60px rgba(0, 212, 255, 0.1),
+                0 0 100px rgba(0, 255, 136, 0.05),
+                inset 0 0 60px rgba(0, 212, 255, 0.03);
+            animation: auroraBorder 4s ease-in-out infinite;
+        }
+        
+        .result-panel.aurora-active::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(ellipse at 0% 0%, rgba(0, 255, 136, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 100% 0%, rgba(0, 212, 255, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 100%, rgba(139, 92, 246, 0.06) 0%, transparent 50%);
+            animation: auroraFloat 10s ease-in-out infinite;
+            pointer-events: none;
+            border-radius: 16px;
+            z-index: 0;
+        }
+        
+        .result-panel.aurora-active > * {
+            position: relative;
+            z-index: 1;
+        }
+        
+        @keyframes auroraBorder {
+            0%, 100% { 
+                border-color: rgba(0, 212, 255, 0.2);
+                box-shadow: 0 0 60px rgba(0, 212, 255, 0.1), 0 0 100px rgba(0, 255, 136, 0.05);
+            }
+            33% { 
+                border-color: rgba(0, 255, 136, 0.25);
+                box-shadow: 0 0 60px rgba(0, 255, 136, 0.15), 0 0 100px rgba(139, 92, 246, 0.08);
+            }
+            66% { 
+                border-color: rgba(139, 92, 246, 0.2);
+                box-shadow: 0 0 60px rgba(139, 92, 246, 0.1), 0 0 100px rgba(0, 212, 255, 0.08);
+            }
+        }
+        
+        @keyframes auroraFloat {
+            0%, 100% { 
+                opacity: 0.6;
+                transform: scale(1) rotate(0deg);
+            }
+            25% { 
+                opacity: 0.8;
+                transform: scale(1.02) rotate(1deg);
+            }
+            50% { 
+                opacity: 0.7;
+                transform: scale(0.98) rotate(-1deg);
+            }
+            75% { 
+                opacity: 0.9;
+                transform: scale(1.01) rotate(0.5deg);
+            }
         }
         
         /* Analysis Content - CLEAN & READABLE */
@@ -1606,10 +1678,81 @@
         .loading { 
             display: none; 
             text-align: center; 
-            padding: 35px; 
+            padding: 35px;
+            position: relative;
+            overflow: hidden;
         }
         
-        .loading.active { display: block; }
+        .loading.active { 
+            display: block; 
+        }
+        
+        /* Premium Aurora Background for Loading */
+        .loading::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: 
+                radial-gradient(ellipse at 20% 80%, rgba(0, 255, 136, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(0, 212, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 40% 40%, rgba(139, 92, 246, 0.1) 0%, transparent 40%),
+                radial-gradient(ellipse at 60% 60%, rgba(255, 107, 0, 0.08) 0%, transparent 45%);
+            animation: auroraMove 8s ease-in-out infinite;
+            z-index: 0;
+        }
+        
+        .loading::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                45deg,
+                transparent 0%,
+                rgba(0, 212, 255, 0.03) 25%,
+                transparent 50%,
+                rgba(0, 255, 136, 0.03) 75%,
+                transparent 100%
+            );
+            background-size: 400% 400%;
+            animation: auroraShimmer 3s ease-in-out infinite;
+            z-index: 0;
+        }
+        
+        .loading > * {
+            position: relative;
+            z-index: 1;
+        }
+        
+        @keyframes auroraMove {
+            0%, 100% { 
+                transform: translate(0, 0) rotate(0deg); 
+                opacity: 0.8;
+            }
+            25% { 
+                transform: translate(10%, -10%) rotate(5deg); 
+                opacity: 1;
+            }
+            50% { 
+                transform: translate(-5%, 5%) rotate(-3deg); 
+                opacity: 0.9;
+            }
+            75% { 
+                transform: translate(-10%, -5%) rotate(3deg); 
+                opacity: 1;
+            }
+        }
+        
+        @keyframes auroraShimmer {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
         
         .spinner {
             border: 4px solid rgba(0,212,255,0.15);
@@ -2307,12 +2450,16 @@
                     if (data.annotations && data.image_base64) {
                         drawAnnotatedChart(data.image_base64, data.annotations);
                     }
+                    
+                    // Add aurora effect to result panel
+                    resultPanel.classList.add('aurora-active');
                 }
                 resultPanel.style.display = 'block';
             } catch (error) {
                 analysisContent.innerHTML = '<div class="error">Error: ' + error.message + '</div>';
                 signalCard.innerHTML = '';
                 resultPanel.style.display = 'block';
+                resultPanel.classList.remove('aurora-active');
             } finally {
                 analyzeBtn.disabled = false;
                 analyzeBtn.textContent = '🔍 Analyze with Institutional Data';
@@ -2705,10 +2852,14 @@
         // User tier from server - Check for owner by email
         const userTier = '{{ user.tier if user else "free" }}';
         const userEmail = '{{ user.email if user else "" }}';
-        const isOwner = userEmail.includes('vanndom300');
+        const isOwner = userEmail.toLowerCase().includes('vanndom300');
         const canUseFullMode = isOwner || (userTier === 'pro' || userTier === 'premium' || userTier === 'owner');
         
+        console.log('[ANALYSIS DEPTH] userTier:', userTier, 'userEmail:', userEmail, 'isOwner:', isOwner, 'canUseFullMode:', canUseFullMode);
+        
         function setAnalysisDepth(depth) {
+            console.log('[ANALYSIS DEPTH] Setting depth to:', depth, 'canUseFullMode:', canUseFullMode);
+            
             // Check if user can use Full mode
             if (depth === 'full' && !canUseFullMode) {
                 alert('🔒 Full (744 Concepts) analysis requires Pro or Premium plan.\n\nUpgrade now to unlock detailed institutional-grade analysis!');
@@ -2717,27 +2868,41 @@
             }
             
             lightMode = (depth === 'light');
+            
+            const lightBtn = document.getElementById('lightModeBtn');
+            const fullBtn = document.getElementById('fullModeBtn');
+            
             if (depth === 'light') {
-                document.getElementById('lightModeBtn').classList.add('active');
-                document.getElementById('fullModeBtn').classList.remove('active');
+                lightBtn.classList.add('active');
+                fullBtn.classList.remove('active');
+                console.log('[ANALYSIS DEPTH] Switched to Light mode');
             } else {
-                document.getElementById('lightModeBtn').classList.remove('active');
-                document.getElementById('fullModeBtn').classList.add('active');
+                lightBtn.classList.remove('active');
+                fullBtn.classList.add('active');
+                console.log('[ANALYSIS DEPTH] Switched to Full mode');
             }
         }
         
         // Initialize: Owner/Pro/Premium can use Full mode, Free users use Light mode
-        if (canUseFullMode) {
-            // Default to Full mode for paid users and owner
-            lightMode = false;
-            document.getElementById('lightModeBtn').classList.remove('active');
-            document.getElementById('fullModeBtn').classList.add('active');
-        } else {
-            // Free users default to Light mode
-            lightMode = true;
-            document.getElementById('lightModeBtn').classList.add('active');
-            document.getElementById('fullModeBtn').classList.remove('active');
-        }
+        // But allow owner to switch between modes freely
+        document.addEventListener('DOMContentLoaded', function() {
+            const lightBtn = document.getElementById('lightModeBtn');
+            const fullBtn = document.getElementById('fullModeBtn');
+            
+            if (canUseFullMode) {
+                // Default to Full mode for paid users and owner
+                lightMode = false;
+                if (lightBtn) lightBtn.classList.remove('active');
+                if (fullBtn) fullBtn.classList.add('active');
+                console.log('[ANALYSIS DEPTH] Initialized to Full mode (owner/paid user)');
+            } else {
+                // Free users default to Light mode
+                lightMode = true;
+                if (lightBtn) lightBtn.classList.add('active');
+                if (fullBtn) fullBtn.classList.remove('active');
+                console.log('[ANALYSIS DEPTH] Initialized to Light mode (free user)');
+            }
+        });
         
         // ========== CUSTOM SYMBOL HANDLER ==========
         function handleSymbolChange() {
@@ -3641,6 +3806,9 @@
                     content = content.replace(/\bSELL\b/g, '<span class="signal-badge signal-sell">📉 SELL</span>');
                     content = content.replace(/\bHOLD\b/g, '<span class="signal-badge signal-hold">⏸️ HOLD</span>');
                     analysisContent.innerHTML = content;
+                    
+                    // Add aurora effect to result panel
+                    resultPanel.classList.add('aurora-active');
                 }
                 resultPanel.style.display = 'block';
                 resultPanel.scrollTo({ top: 0, behavior: 'smooth' });
@@ -3648,6 +3816,7 @@
                 analysisContent.innerHTML = `<div class="error">Error: ${error.message}</div>`;
                 signalCard.innerHTML = '';
                 resultPanel.style.display = 'block';
+                resultPanel.classList.remove('aurora-active');
             } finally {
                 analyzeBtn.disabled = false;
                 loading.classList.remove('active');

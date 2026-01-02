@@ -2740,6 +2740,29 @@ def analyze_visual():
                     symbol, entry, stop_loss, tp1, tp2, tp3
                 )
         
+        # Save analysis to database for user history
+        try:
+            trade_levels = annotations.get('annotations', {}).get('trade_levels', {})
+            signal_type = annotations.get('bias', 'NEUTRAL')
+            confidence = annotations.get('confidence', 50)
+            entry_price = trade_levels.get('entry', {}).get('price') if trade_levels.get('entry') else None
+            sl_price = trade_levels.get('stop_loss', {}).get('price') if trade_levels.get('stop_loss') else None
+            tp1_price = trade_levels.get('tp1', {}).get('price') if trade_levels.get('tp1') else None
+            
+            save_analysis(
+                user_id=user['id'],
+                symbol=symbol,
+                timeframe=interval,
+                signal_type=signal_type,
+                confidence=confidence,
+                entry=entry_price,
+                sl=sl_price,
+                tp=tp1_price,
+                analysis_text=analysis[:500] if analysis else None  # Save first 500 chars
+            )
+        except Exception as save_err:
+            print(f"[SAVE ANALYSIS] Error saving to history: {save_err}")
+        
         return jsonify({
             'analysis': analysis,
             'annotations': annotations,
@@ -3327,7 +3350,19 @@ def settings_page():
             session.clear()
             return redirect('/login?error=Session expired. Please login again.')
         tier_info = get_user_tier_info(user['id'])
-        return render_template('settings.html', user=user, tier_info=tier_info)
+        
+        # Get signal history from database
+        from auth import get_user_history, get_subscription_history, get_user_full_stats
+        signal_history = get_user_history(user['id'], limit=50)
+        subscription_history = get_subscription_history(user['id'])
+        user_stats = get_user_full_stats(user['id'])
+        
+        return render_template('settings.html', 
+                               user=user, 
+                               tier_info=tier_info,
+                               signal_history=signal_history,
+                               subscription_history=subscription_history,
+                               user_stats=user_stats)
     except Exception as e:
         import traceback
         print(f"[SETTINGS ERROR] {traceback.format_exc()}")

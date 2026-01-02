@@ -473,12 +473,211 @@
             box-shadow: 0 10px 30px rgba(255, 71, 87, 0.2);
         }
         
+        /* Signal History Section */
+        .history-list {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        
+        .history-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .history-list::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+        }
+        
+        .history-list::-webkit-scrollbar-thumb {
+            background: rgba(0, 212, 255, 0.3);
+            border-radius: 3px;
+        }
+        
+        .history-item {
+            background: rgba(13, 17, 23, 0.6);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-left: 4px solid #00d4ff;
+            transition: all 0.3s ease;
+        }
+        
+        .history-item:hover {
+            background: rgba(0, 212, 255, 0.08);
+            transform: translateX(5px);
+        }
+        
+        .history-item.bullish { border-left-color: #00ff88; }
+        .history-item.bearish { border-left-color: #ff4757; }
+        .history-item.neutral { border-left-color: #ffd700; }
+        
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .history-symbol {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #e6edf3;
+        }
+        
+        .history-signal {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        
+        .signal-bullish { background: rgba(0, 255, 136, 0.2); color: #00ff88; }
+        .signal-bearish { background: rgba(255, 71, 87, 0.2); color: #ff4757; }
+        .signal-neutral { background: rgba(255, 215, 0, 0.2); color: #ffd700; }
+        
+        .history-details {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            font-size: 0.85rem;
+            color: #8b949e;
+        }
+        
+        .history-detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        
+        .history-detail-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: #6e7681;
+        }
+        
+        .history-detail-value {
+            color: #e6edf3;
+            font-weight: 600;
+        }
+        
+        .history-date {
+            font-size: 0.75rem;
+            color: #6e7681;
+            margin-top: 10px;
+            text-align: right;
+        }
+        
+        .no-history {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6e7681;
+        }
+        
+        .no-history-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+        
+        /* Subscription History */
+        .sub-history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            background: rgba(13, 17, 23, 0.4);
+            border-radius: 12px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .sub-tier-badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+        
+        .sub-tier-pro {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(0, 150, 255, 0.2));
+            color: #00d4ff;
+        }
+        
+        .sub-tier-premium {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 165, 0, 0.2));
+            color: #ffd700;
+        }
+        
+        .sub-date {
+            color: #8b949e;
+            font-size: 0.85rem;
+        }
+        
+        /* Extended Stats */
+        .extended-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .mini-stat {
+            background: rgba(13, 17, 23, 0.4);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .mini-stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #00d4ff;
+        }
+        
+        .mini-stat-label {
+            font-size: 0.75rem;
+            color: #8b949e;
+            text-transform: uppercase;
+        }
+        
+        /* Top Symbols */
+        .top-symbols {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .symbol-chip {
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: #00d4ff;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .symbol-count {
+            background: rgba(0, 212, 255, 0.2);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+        
         /* Responsive */
         @media (max-width: 600px) {
             .stats-grid { grid-template-columns: 1fr; }
             .profile-info { flex-direction: column; text-align: center; }
             .page-title { font-size: 2rem; }
             .settings-section { padding: 25px 20px; }
+            .history-details { grid-template-columns: 1fr; }
+            .extended-stats { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -560,6 +759,103 @@
                     <div class="stat-label">All Time</div>
                 </div>
             </div>
+            
+            <!-- Extended Stats -->
+            {% if user_stats %}
+            <div class="extended-stats">
+                <div class="mini-stat">
+                    <div class="mini-stat-value">{{ user_stats.this_week or 0 }}</div>
+                    <div class="mini-stat-label">This Week</div>
+                </div>
+                <div class="mini-stat">
+                    <div class="mini-stat-value">{{ user_stats.this_month or 0 }}</div>
+                    <div class="mini-stat-label">This Month</div>
+                </div>
+            </div>
+            
+            <!-- Top Analyzed Symbols -->
+            {% if user_stats.top_symbols %}
+            <div style="margin-top: 20px;">
+                <div style="color: #8b949e; font-size: 0.85rem; margin-bottom: 10px;">🎯 Most Analyzed Pairs</div>
+                <div class="top-symbols">
+                    {% for item in user_stats.top_symbols %}
+                    <div class="symbol-chip">
+                        {{ item.symbol }}
+                        <span class="symbol-count">{{ item.count }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            {% endif %}
+        </div>
+        
+        <!-- Signal History Section -->
+        <div class="settings-section">
+            <div class="section-title"><span class="section-icon">📜</span> Signal History</div>
+            {% if signal_history and signal_history|length > 0 %}
+            <div class="history-list">
+                {% for signal in signal_history %}
+                <div class="history-item {% if 'BULLISH' in (signal.signal_type or '')|upper %}bullish{% elif 'BEARISH' in (signal.signal_type or '')|upper %}bearish{% else %}neutral{% endif %}">
+                    <div class="history-header">
+                        <span class="history-symbol">{{ signal.symbol or 'N/A' }}</span>
+                        <span class="history-signal {% if 'BULLISH' in (signal.signal_type or '')|upper %}signal-bullish{% elif 'BEARISH' in (signal.signal_type or '')|upper %}signal-bearish{% else %}signal-neutral{% endif %}">
+                            {{ signal.signal_type or 'N/A' }}
+                        </span>
+                    </div>
+                    <div class="history-details">
+                        <div class="history-detail-item">
+                            <span class="history-detail-label">Timeframe</span>
+                            <span class="history-detail-value">{{ signal.timeframe or 'N/A' }}</span>
+                        </div>
+                        <div class="history-detail-item">
+                            <span class="history-detail-label">Confidence</span>
+                            <span class="history-detail-value">{{ signal.confidence or 0 }}%</span>
+                        </div>
+                        <div class="history-detail-item">
+                            <span class="history-detail-label">Entry</span>
+                            <span class="history-detail-value">{{ signal.entry_price or 'N/A' }}</span>
+                        </div>
+                    </div>
+                    <div class="history-date">{{ signal.created_at[:16] if signal.created_at else 'N/A' }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="no-history">
+                <div class="no-history-icon">📊</div>
+                <p>No analysis history yet.</p>
+                <p style="font-size: 0.85rem; margin-top: 8px;">Start analyzing charts to build your history!</p>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Subscription History Section -->
+        <div class="settings-section">
+            <div class="section-title"><span class="section-icon">💳</span> Subscription History</div>
+            {% if subscription_history and subscription_history|length > 0 %}
+            {% for sub in subscription_history %}
+            <div class="sub-history-item">
+                <div>
+                    <span class="sub-tier-badge {% if sub.tier == 'premium' %}sub-tier-premium{% else %}sub-tier-pro{% endif %}">
+                        {% if sub.tier == 'premium' %}💎 PREMIUM{% else %}⭐ PRO{% endif %}
+                    </span>
+                </div>
+                <div class="sub-date">
+                    <div>Started: {{ sub.created_at[:10] if sub.created_at else 'N/A' }}</div>
+                    {% if sub.expires_at %}
+                    <div style="font-size: 0.8rem; color: #6e7681;">Expires: {{ sub.expires_at[:10] }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="no-history">
+                <div class="no-history-icon">💎</div>
+                <p>No subscription history yet.</p>
+                <p style="font-size: 0.85rem; margin-top: 8px;">Upgrade to Pro or Premium to unlock more features!</p>
+            </div>
+            {% endif %}
         </div>
         
         <!-- Subscription Section -->
