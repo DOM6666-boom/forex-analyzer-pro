@@ -2622,7 +2622,15 @@ def check_limit():
 def index():
     """Main page - requires login for full features"""
     user = get_current_user()
-    return render_template('index.html', user=user)
+    
+    # Calculate is_owner and is_paid for template
+    is_owner = False
+    is_paid = False
+    if user:
+        is_owner = 'vanndom300' in user.get('email', '').lower()
+        is_paid = user.get('tier', 'free') in ['pro', 'premium']
+    
+    return render_template('index.html', user=user, is_owner=is_owner, is_paid=is_paid)
 
 
 @app.route('/analyze', methods=['POST'])
@@ -3425,11 +3433,11 @@ def submit_payment():
         screenshot_path = None
         if screenshot:
             import os
-            upload_dir = 'payment_screenshots'
+            upload_dir = 'static/payment_screenshots'
             os.makedirs(upload_dir, exist_ok=True)
             filename = f"{user['id']}_{plan}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
-            screenshot_path = os.path.join(upload_dir, filename)
-            screenshot.save(screenshot_path)
+            screenshot_path = f"/static/payment_screenshots/{filename}"
+            screenshot.save(os.path.join('static/payment_screenshots', filename))
         
         # Insert payment request
         c.execute('''

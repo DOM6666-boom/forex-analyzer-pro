@@ -134,7 +134,7 @@
                     <div class="detail-item">Transaction Ref: <span>{{ payment.transaction_ref or 'N/A' }}</span></div>
                     <div class="detail-item">Date: <span>{{ payment.created_at[:16] if payment.created_at else 'N/A' }}</span></div>
                     {% if payment.screenshot_path %}
-                    <div class="detail-item">Screenshot: <a href="/{{ payment.screenshot_path }}" target="_blank" class="screenshot-link">View 📷</a></div>
+                    <div class="detail-item">Screenshot: <a href="{{ payment.screenshot_path }}" target="_blank" class="screenshot-link">View 📷</a></div>
                     {% endif %}
                 </div>
                 
