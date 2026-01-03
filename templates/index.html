@@ -2978,7 +2978,7 @@
         }
         
         // Initialize buttons with event listeners (more reliable than onclick)
-        document.addEventListener('DOMContentLoaded', function() {
+        function initAnalysisDepthButtons() {
             const lightBtn = document.getElementById('lightModeBtn');
             const fullBtn = document.getElementById('fullModeBtn');
             
@@ -3030,7 +3030,14 @@
                 lightBtn.classList.add('active');
                 console.log('[ANALYSIS DEPTH] ✅ Initialized for FREE user - Light mode only');
             }
-        });
+        }
+        
+        // Run immediately if DOM ready, otherwise wait
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initAnalysisDepthButtons);
+        } else {
+            initAnalysisDepthButtons();
+        }
         
         // ========== CUSTOM SYMBOL HANDLER ==========
         function handleSymbolChange() {
