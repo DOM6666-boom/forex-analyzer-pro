@@ -2961,15 +2961,6 @@
                 return;
             }
             
-            // Owner, Pro, Premium can use both modes freely
-            // Free users can only use Light mode
-            if (depth === 'full' && !canUseFullMode) {
-                console.log('[ANALYSIS DEPTH] Blocked - free user cannot use full mode');
-                alert('🔒 Full (744 Concepts) requires Pro or Premium plan.\n\nUpgrade now!');
-                window.location.href = '/pricing';
-                return;
-            }
-            
             // Update lightMode variable
             lightMode = (depth === 'light');
             
@@ -2987,26 +2978,39 @@
         }
         
         // Initialize buttons with event listeners (more reliable than onclick)
-        (function initAnalysisDepthButtons() {
+        document.addEventListener('DOMContentLoaded', function() {
             const lightBtn = document.getElementById('lightModeBtn');
             const fullBtn = document.getElementById('fullModeBtn');
             
             if (!lightBtn || !fullBtn) {
-                console.log('[ANALYSIS DEPTH] Buttons not found, retrying in 100ms...');
-                setTimeout(initAnalysisDepthButtons, 100);
+                console.error('[ANALYSIS DEPTH] Buttons not found!');
                 return;
             }
+            
+            console.log('[ANALYSIS DEPTH] Buttons found, attaching event listeners...');
             
             // Add click event listeners
             lightBtn.addEventListener('click', function(e) {
                 e.preventDefault();
+                e.stopPropagation();
                 console.log('[ANALYSIS DEPTH] Light button clicked');
                 setAnalysisDepth('light');
             });
             
             fullBtn.addEventListener('click', function(e) {
                 e.preventDefault();
+                e.stopPropagation();
                 console.log('[ANALYSIS DEPTH] Full button clicked');
+                console.log('[ANALYSIS DEPTH] canUseFullMode:', canUseFullMode);
+                
+                // Check if free user trying to use full mode
+                if (!canUseFullMode) {
+                    console.log('[ANALYSIS DEPTH] FREE USER - showing upgrade alert');
+                    alert('🔒 Full (744 Concepts) requires Pro or Premium plan.\n\nClick OK to see pricing options.');
+                    window.location.href = '/pricing';
+                    return;
+                }
+                
                 setAnalysisDepth('full');
             });
             
@@ -3026,7 +3030,7 @@
                 lightBtn.classList.add('active');
                 console.log('[ANALYSIS DEPTH] ✅ Initialized for FREE user - Light mode only');
             }
-        })();
+        });
         
         // ========== CUSTOM SYMBOL HANDLER ==========
         function handleSymbolChange() {
