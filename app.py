@@ -3500,8 +3500,17 @@ def approve_payment(payment_id):
         if not payment:
             return jsonify({'error': 'Payment not found'}), 404
         
+        target_user_id = payment['user_id']
+        target_plan = payment['plan']
+        target_email = payment['user_email']
+        
+        print(f"[APPROVE] Starting approval: user_id={target_user_id}, plan={target_plan}, email={target_email}")
+        print(f"[APPROVE] Database path: {DB_PATH}")
+        
         # Update user tier
-        c.execute('UPDATE users SET tier = ? WHERE id = ?', (payment['plan'], payment['user_id']))
+        c.execute('UPDATE users SET tier = ? WHERE id = ?', (target_plan, target_user_id))
+        tier_rows = c.rowcount
+        print(f"[APPROVE] Tier update rows affected: {tier_rows}")
         
         # Update payment status
         c.execute('''
@@ -3514,16 +3523,26 @@ def approve_payment(payment_id):
         c.execute('''
             INSERT OR REPLACE INTO subscriptions (user_id, tier, created_at)
             VALUES (?, ?, ?)
-        ''', (payment['user_id'], payment['plan'], datetime.now().isoformat()))
+        ''', (target_user_id, target_plan, datetime.now().isoformat()))
         
         conn.commit()
         conn.close()
         
-        print(f"[PAYMENT APPROVED] User {payment['user_email']} upgraded to {payment['plan']}")
+        # Verify the update worked
+        from auth import get_user_by_id
+        verified_user = get_user_by_id(target_user_id)
+        if verified_user:
+            print(f"[APPROVE] ✅ Verified: {target_email} tier is now '{verified_user.get('tier')}'")
+        else:
+            print(f"[APPROVE] ⚠️ Could not verify user after update")
         
-        return jsonify({'success': True, 'message': f"User upgraded to {payment['plan']}"})
+        print(f"[PAYMENT APPROVED] User {target_email} upgraded to {target_plan}")
+        
+        return jsonify({'success': True, 'message': f"User upgraded to {target_plan}"})
     except Exception as e:
         print(f"[APPROVE ERROR] {e}")
+        import traceback
+        traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
 
@@ -3674,6 +3693,28 @@ def stripe_config():
     return jsonify({
         'publicKey': STRIPE_PUBLIC_KEY,
         'configured': bool(STRIPE_PUBLIC_KEY and STRIPE_SECRET_KEY)
+    })
+
+
+@app.route('/api/debug-user-tier')
+@login_required
+def debug_user_tier():
+    """Debug endpoint to check user tier - only for owner"""
+    user = get_current_user()
+    if not user or 'vanndom300' not in user.get('email', ''):
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    # Get fresh data from database
+    from auth import get_user_by_id, DB_PATH
+    fresh_user = get_user_by_id(user['id'])
+    
+    return jsonify({
+        'db_path': DB_PATH,
+        'session_user_id': session.get('user_id'),
+        'user_email': user.get('email'),
+        'user_tier_from_session': user.get('tier'),
+        'user_tier_from_db': fresh_user.get('tier') if fresh_user else None,
+        'is_persistent_disk': '/opt/render' in DB_PATH
     })
 
 

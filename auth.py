@@ -20,14 +20,21 @@ import os
 
 DB_PATH = 'forex_users.db'
 if os.environ.get('RENDER'):
-    # Try persistent disk first
+    # Try persistent disk first - MUST use this for data persistence
     disk_path = '/opt/render/project/src/data'
-    if os.path.exists(disk_path) or os.access(os.path.dirname(disk_path), os.W_OK):
-        try:
-            os.makedirs(disk_path, exist_ok=True)
-            DB_PATH = os.path.join(disk_path, 'forex_users.db')
-        except:
-            DB_PATH = 'forex_users.db'
+    try:
+        os.makedirs(disk_path, exist_ok=True)
+        DB_PATH = os.path.join(disk_path, 'forex_users.db')
+        # Test write access
+        test_file = os.path.join(disk_path, '.test_write')
+        with open(test_file, 'w') as f:
+            f.write('test')
+        os.remove(test_file)
+        print(f"[DATABASE] ✅ Persistent disk available at {disk_path}")
+    except Exception as e:
+        print(f"[DATABASE] ⚠️ Persistent disk NOT available: {e}")
+        print(f"[DATABASE] ⚠️ Using ephemeral storage - DATA WILL BE LOST ON RESTART!")
+        DB_PATH = 'forex_users.db'
 
 print(f"[DATABASE] Using path: {DB_PATH}")
 
@@ -154,7 +161,11 @@ def get_user_by_id(user_id):
     c.execute('SELECT * FROM users WHERE id = ?', (user_id,))
     user = c.fetchone()
     conn.close()
-    return dict(user) if user else None
+    if user:
+        user_dict = dict(user)
+        print(f"[GET_USER] id={user_id}, email={user_dict.get('email')}, tier={user_dict.get('tier')}")
+        return user_dict
+    return None
 
 def create_user(email, password=None, name=None, picture=None, provider='email'):
     conn = sqlite3.connect(DB_PATH)
@@ -321,12 +332,20 @@ def get_user_full_stats(user_id):
 # ========== SUBSCRIPTION MANAGEMENT ==========
 def upgrade_user_tier(user_id, tier):
     if tier not in TIER_LIMITS:
+        print(f"[UPGRADE] ❌ Invalid tier: {tier}")
         return False
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute('UPDATE users SET tier = ? WHERE id = ?', (tier, user_id))
+    rows_affected = c.rowcount
     conn.commit()
     conn.close()
+    print(f"[UPGRADE] User {user_id} -> {tier}, rows_affected={rows_affected}")
+    
+    # Verify the update
+    user = get_user_by_id(user_id)
+    if user:
+        print(f"[UPGRADE] Verified: user tier is now {user.get('tier')}")
     return True
 
 def get_user_tier_info(user_id):
