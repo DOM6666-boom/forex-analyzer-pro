@@ -140,9 +140,13 @@ IS_PRODUCTION = os.environ.get('RENDER') is not None
 app.config['SESSION_COOKIE_SECURE'] = IS_PRODUCTION  # True on Render (HTTPS), False locally
 app.config['SESSION_COOKIE_HTTPONLY'] = True  # Prevent JavaScript access to cookies
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # CSRF protection
-app.config['PERMANENT_SESSION_LIFETIME'] = 86400  # 24 hours session
+app.config['PERMANENT_SESSION_LIFETIME'] = 2592000  # 30 days session (was 24 hours)
 
-print(f"[SESSION] Production mode: {IS_PRODUCTION}, Secure cookies: {IS_PRODUCTION}")
+# Remember user for 30 days
+from datetime import timedelta
+app.permanent_session_lifetime = timedelta(days=30)
+
+print(f"[SESSION] Production mode: {IS_PRODUCTION}, Secure cookies: {IS_PRODUCTION}, Session lifetime: 30 days")
 
 # Security Headers
 @app.after_request
