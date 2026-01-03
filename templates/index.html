@@ -78,7 +78,7 @@
             overflow-x: hidden;
         }
         
-        /* ========== JUJUTSU KAISEN CURSED ENERGY BACKGROUND ========== */
+        /* ========== JUJUTSU KAISEN CURSED ENERGY BACKGROUND - PREMIUM ========== */
         body::before {
             content: '';
             position: fixed;
@@ -87,11 +87,12 @@
             right: 0;
             bottom: 0;
             background: 
-                radial-gradient(ellipse at 20% 20%, rgba(138, 43, 226, 0.15) 0%, transparent 50%),
-                radial-gradient(ellipse at 80% 80%, rgba(0, 191, 255, 0.12) 0%, transparent 50%),
-                radial-gradient(ellipse at 50% 50%, rgba(255, 0, 128, 0.08) 0%, transparent 60%),
-                radial-gradient(ellipse at 90% 20%, rgba(148, 0, 211, 0.1) 0%, transparent 40%);
-            animation: cursedEnergyPulse 8s ease-in-out infinite;
+                radial-gradient(ellipse at 15% 15%, rgba(138, 43, 226, 0.2) 0%, transparent 45%),
+                radial-gradient(ellipse at 85% 85%, rgba(0, 191, 255, 0.18) 0%, transparent 45%),
+                radial-gradient(ellipse at 50% 50%, rgba(148, 0, 211, 0.1) 0%, transparent 60%),
+                radial-gradient(ellipse at 90% 10%, rgba(255, 0, 128, 0.12) 0%, transparent 40%),
+                radial-gradient(ellipse at 10% 90%, rgba(0, 255, 136, 0.1) 0%, transparent 40%);
+            animation: cursedEnergyPulse 6s ease-in-out infinite;
             pointer-events: none;
             z-index: 0;
         }
@@ -4289,15 +4290,17 @@
             'rgba(0, 255, 255, 0.4)'     // Cyan - Hollow Purple
         ];
         
-        for (let i = 0; i < 15; i++) {
+        // Create more particles with varied effects
+        for (let i = 0; i < 25; i++) {
             const particle = document.createElement('div');
             particle.className = 'cursed-particle';
             
-            const size = Math.random() * 8 + 4;
+            const size = Math.random() * 10 + 3;
             const color = colors[Math.floor(Math.random() * colors.length)];
             const left = Math.random() * 100;
-            const delay = Math.random() * 10;
-            const duration = Math.random() * 15 + 20;
+            const delay = Math.random() * 15;
+            const duration = Math.random() * 20 + 15;
+            const blur = Math.random() * 2;
             
             particle.style.cssText = `
                 width: ${size}px;
@@ -4305,11 +4308,47 @@
                 background: ${color};
                 left: ${left}%;
                 top: 100%;
-                box-shadow: 0 0 ${size * 2}px ${color}, 0 0 ${size * 4}px ${color};
+                box-shadow: 0 0 ${size * 3}px ${color}, 0 0 ${size * 6}px ${color}, 0 0 ${size * 9}px ${color};
+                filter: blur(${blur}px);
                 animation: floatUp ${duration}s linear ${delay}s infinite;
             `;
             
             document.body.appendChild(particle);
+        }
+        
+        // Create floating orbs (larger, slower)
+        const orbColors = [
+            'rgba(138, 43, 226, 0.15)',
+            'rgba(0, 191, 255, 0.12)',
+            'rgba(148, 0, 211, 0.1)'
+        ];
+        
+        for (let i = 0; i < 5; i++) {
+            const orb = document.createElement('div');
+            orb.className = 'cursed-orb-float';
+            
+            const size = Math.random() * 200 + 100;
+            const color = orbColors[Math.floor(Math.random() * orbColors.length)];
+            const left = Math.random() * 80 + 10;
+            const top = Math.random() * 80 + 10;
+            const duration = Math.random() * 20 + 30;
+            
+            orb.style.cssText = `
+                position: fixed;
+                width: ${size}px;
+                height: ${size}px;
+                background: radial-gradient(circle, ${color} 0%, transparent 70%);
+                left: ${left}%;
+                top: ${top}%;
+                border-radius: 50%;
+                filter: blur(40px);
+                pointer-events: none;
+                z-index: 0;
+                animation: orbDrift ${duration}s ease-in-out infinite;
+                animation-delay: ${Math.random() * 10}s;
+            `;
+            
+            document.body.appendChild(orb);
         }
         
         // Add keyframes dynamically
@@ -4317,18 +4356,40 @@
         style.textContent = `
             @keyframes floatUp {
                 0% {
-                    transform: translateY(0) translateX(0) scale(1);
+                    transform: translateY(0) translateX(0) scale(1) rotate(0deg);
                     opacity: 0;
                 }
-                10% {
+                5% {
+                    opacity: 0.8;
+                }
+                50% {
                     opacity: 1;
                 }
-                90% {
-                    opacity: 1;
+                95% {
+                    opacity: 0.8;
                 }
                 100% {
-                    transform: translateY(-110vh) translateX(${Math.random() > 0.5 ? '' : '-'}${Math.random() * 100}px) scale(0.5);
+                    transform: translateY(-120vh) translateX(${Math.random() > 0.5 ? '' : '-'}${Math.random() * 150}px) scale(0.3) rotate(360deg);
                     opacity: 0;
+                }
+            }
+            
+            @keyframes orbDrift {
+                0%, 100% {
+                    transform: translate(0, 0) scale(1);
+                    opacity: 0.6;
+                }
+                25% {
+                    transform: translate(30px, -20px) scale(1.1);
+                    opacity: 0.8;
+                }
+                50% {
+                    transform: translate(-20px, 30px) scale(0.9);
+                    opacity: 0.5;
+                }
+                75% {
+                    transform: translate(-30px, -30px) scale(1.05);
+                    opacity: 0.7;
                 }
             }
         `;
