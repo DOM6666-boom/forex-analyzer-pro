@@ -71,11 +71,83 @@
             padding: 15px;
             line-height: 1.6;
             transition: background 0.3s ease, color 0.3s ease;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* ========== JUJUTSU KAISEN CURSED ENERGY BACKGROUND ========== */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(ellipse at 20% 20%, rgba(138, 43, 226, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(0, 191, 255, 0.12) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(255, 0, 128, 0.08) 0%, transparent 60%),
+                radial-gradient(ellipse at 90% 20%, rgba(148, 0, 211, 0.1) 0%, transparent 40%);
+            animation: cursedEnergyPulse 8s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                linear-gradient(45deg, transparent 40%, rgba(138, 43, 226, 0.03) 50%, transparent 60%),
+                linear-gradient(-45deg, transparent 40%, rgba(0, 191, 255, 0.03) 50%, transparent 60%);
+            background-size: 400% 400%;
+            animation: domainExpansion 15s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        @keyframes cursedEnergyPulse {
+            0%, 100% { 
+                opacity: 0.6;
+                transform: scale(1);
+            }
+            25% { 
+                opacity: 0.8;
+                transform: scale(1.02);
+            }
+            50% { 
+                opacity: 0.5;
+                transform: scale(0.98);
+            }
+            75% { 
+                opacity: 0.9;
+                transform: scale(1.01);
+            }
+        }
+        
+        @keyframes domainExpansion {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* Floating Cursed Energy Particles */
+        .cursed-particle {
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            filter: blur(1px);
         }
         
         .container { 
             max-width: 1600px; 
-            margin: 0 auto; 
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
         }
         
         /* ========== TOP STATUS BAR ========== */
@@ -4154,6 +4226,64 @@
         
         updateTime();
         setInterval(updateTime, 1000);
+    })();
+    </script>
+    
+    <!-- Jujutsu Kaisen Cursed Energy Particles -->
+    <script>
+    (function createCursedParticles() {
+        const colors = [
+            'rgba(138, 43, 226, 0.6)',  // Purple - Gojo's Infinity
+            'rgba(0, 191, 255, 0.5)',    // Blue - Cursed Energy
+            'rgba(255, 0, 128, 0.4)',    // Pink - Sukuna's power
+            'rgba(148, 0, 211, 0.5)',    // Violet - Domain
+            'rgba(0, 255, 255, 0.4)'     // Cyan - Hollow Purple
+        ];
+        
+        for (let i = 0; i < 15; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'cursed-particle';
+            
+            const size = Math.random() * 8 + 4;
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            const left = Math.random() * 100;
+            const delay = Math.random() * 10;
+            const duration = Math.random() * 15 + 20;
+            
+            particle.style.cssText = `
+                width: ${size}px;
+                height: ${size}px;
+                background: ${color};
+                left: ${left}%;
+                top: 100%;
+                box-shadow: 0 0 ${size * 2}px ${color}, 0 0 ${size * 4}px ${color};
+                animation: floatUp ${duration}s linear ${delay}s infinite;
+            `;
+            
+            document.body.appendChild(particle);
+        }
+        
+        // Add keyframes dynamically
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes floatUp {
+                0% {
+                    transform: translateY(0) translateX(0) scale(1);
+                    opacity: 0;
+                }
+                10% {
+                    opacity: 1;
+                }
+                90% {
+                    opacity: 1;
+                }
+                100% {
+                    transform: translateY(-110vh) translateX(${Math.random() > 0.5 ? '' : '-'}${Math.random() * 100}px) scale(0.5);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
     })();
     </script>
 </body>
