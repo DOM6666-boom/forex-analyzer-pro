@@ -2345,8 +2345,8 @@
                 <div class="form-group">
                     <label>Analysis Depth</label>
                     <div class="mode-toggle">
-                        <button type="button" class="mode-btn" id="lightModeBtn">⚡ Light (Fast)</button>
-                        <button type="button" class="mode-btn" id="fullModeBtn">
+                        <button type="button" class="mode-btn {% if is_owner or is_paid %}{% else %}active{% endif %}" id="lightModeBtn">⚡ Light (Fast)</button>
+                        <button type="button" class="mode-btn {% if is_owner or is_paid %}active{% endif %}" id="fullModeBtn">
                             🔬 Full (744 Concepts)
                             {% if not is_owner and not is_paid %}
                             <span style="font-size: 0.6rem; color: #ffd700;">🔒 PRO</span>
@@ -3037,8 +3037,20 @@
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', initAnalysisDepthButtons);
         } else {
+            // DOM already ready, run now
             initAnalysisDepthButtons();
         }
+        
+        // Fallback: also run on window load in case DOMContentLoaded already fired
+        window.addEventListener('load', function() {
+            const lightBtn = document.getElementById('lightModeBtn');
+            const fullBtn = document.getElementById('fullModeBtn');
+            // If no button has active class, initialize again
+            if (lightBtn && fullBtn && !lightBtn.classList.contains('active') && !fullBtn.classList.contains('active')) {
+                console.log('[ANALYSIS DEPTH] Fallback initialization on window.load');
+                initAnalysisDepthButtons();
+            }
+        });
         
         // ========== CUSTOM SYMBOL HANDLER ==========
         function handleSymbolChange() {
