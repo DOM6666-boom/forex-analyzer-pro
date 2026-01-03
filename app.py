@@ -2301,8 +2301,94 @@ Look at the chart and provide:
 ⚠️ Remember: BUY = SL below entry | SELL = SL above entry"""
 
 
-def analyze_chart(image_data, symbol="XAU/USD", interval="1h", light_mode=False):
+def analyze_chart(image_data, symbol="XAU/USD", interval="1h", light_mode=False, auto_detect=False):
     base64_image = base64.b64encode(image_data).decode('utf-8')
+    
+    # ========== OWNER AUTO-DETECT MODE ==========
+    if auto_detect:
+        # First, ask AI to detect symbol and timeframe from the chart image
+        detect_prompt = """Look at this trading chart image and identify:
+1. **SYMBOL**: What trading instrument is shown? (e.g., XAUUSD, EURUSD, BTCUSD, US30, etc.)
+2. **TIMEFRAME**: What timeframe is the chart? (e.g., M1, M5, M15, M30, H1, H4, D1, W1, MN)
+
+Look for:
+- Symbol name in the chart title, corner, or header
+- Timeframe indicator (usually near the symbol or in chart settings)
+- Price range to help identify the instrument (Gold ~2600-2700, EURUSD ~1.0-1.1, etc.)
+
+Respond in this EXACT format only:
+SYMBOL: [detected symbol]
+TIMEFRAME: [detected timeframe]
+
+If you cannot detect, use:
+SYMBOL: XAU/USD
+TIMEFRAME: H1"""
+        
+        try:
+            detect_response = call_groq_with_fallback(
+                messages=[{
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": detect_prompt},
+                        {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
+                    ]
+                }],
+                max_tokens=100,
+                temperature=0.1,
+                has_images=True,
+                image_base64=base64_image
+            )
+            
+            detect_text = detect_response.choices[0].message.content
+            print(f"[AUTO-DETECT] AI Response: {detect_text}")
+            
+            # Parse detected values
+            import re
+            symbol_match = re.search(r'SYMBOL:\s*([A-Za-z0-9/\-]+)', detect_text)
+            timeframe_match = re.search(r'TIMEFRAME:\s*([A-Za-z0-9]+)', detect_text)
+            
+            if symbol_match:
+                detected_symbol = symbol_match.group(1).upper().strip()
+                # Normalize symbol format
+                if 'XAU' in detected_symbol or 'GOLD' in detected_symbol:
+                    symbol = 'XAU/USD'
+                elif 'XAG' in detected_symbol or 'SILVER' in detected_symbol:
+                    symbol = 'XAG/USD'
+                elif 'BTC' in detected_symbol:
+                    symbol = 'BTC/USD'
+                elif 'ETH' in detected_symbol:
+                    symbol = 'ETH/USD'
+                elif '/' in detected_symbol:
+                    symbol = detected_symbol
+                else:
+                    # Add /USD if missing for forex pairs
+                    if detected_symbol in ['EUR', 'GBP', 'AUD', 'NZD', 'CAD', 'CHF', 'JPY']:
+                        symbol = f"{detected_symbol}/USD"
+                    else:
+                        symbol = detected_symbol
+            
+            if timeframe_match:
+                detected_tf = timeframe_match.group(1).upper().strip()
+                # Normalize timeframe format
+                tf_map = {
+                    'M1': '1min', '1M': '1min', '1MIN': '1min',
+                    'M5': '5min', '5M': '5min', '5MIN': '5min',
+                    'M15': '15min', '15M': '15min', '15MIN': '15min',
+                    'M30': '30min', '30M': '30min', '30MIN': '30min',
+                    'H1': '1h', '1H': '1h', '60M': '1h', '60MIN': '1h',
+                    'H4': '4h', '4H': '4h', '240M': '4h',
+                    'D1': '1day', '1D': '1day', 'D': '1day', 'DAILY': '1day',
+                    'W1': '1week', '1W': '1week', 'W': '1week', 'WEEKLY': '1week',
+                    'MN': '1month', '1MN': '1month', 'MONTHLY': '1month'
+                }
+                interval = tf_map.get(detected_tf, '1h')
+            
+            print(f"[AUTO-DETECT] Final: Symbol={symbol}, Interval={interval}")
+            
+        except Exception as e:
+            print(f"[AUTO-DETECT] Error: {e}, using defaults")
+            symbol = 'XAU/USD'
+            interval = '1h'
     
     # ========== CANDLESTICK DATA INJECTION ==========
     # Fetch real MT5 data to give AI exact prices (no guessing from Y-axis!)
@@ -2784,28 +2870,37 @@ def analyze_visual():
     
     file = request.files['image']
     
-    # ========== INPUT VALIDATION & SANITIZATION ==========
-    # Validate symbol (prevent injection)
+    # ========== CHECK IF OWNER AUTO-DETECT MODE ==========
+    is_owner = user and 'vanndom300' in user.get('email', '').lower()
     symbol = request.form.get('symbol', 'XAU/USD')
-    allowed_symbols = ['XAU/USD', 'XAG/USD', 'EUR/USD', 'GBP/USD', 'USD/JPY', 'USD/CHF', 
-                       'AUD/USD', 'NZD/USD', 'USD/CAD', 'EUR/GBP', 'EUR/JPY', 'GBP/JPY',
-                       'BTC/USD', 'ETH/USD', 'US30', 'NAS100', 'SPX500']
-    # Allow custom symbols but sanitize them
-    if symbol not in allowed_symbols:
-        # Sanitize custom symbol: only allow alphanumeric, /, and -
-        import re
-        symbol = re.sub(r'[^A-Za-z0-9/\-]', '', symbol)[:20]  # Max 20 chars
-        if not symbol:
-            symbol = 'XAU/USD'
-    
-    # Validate interval
     interval = request.form.get('interval', '1h')
-    allowed_intervals = ['1min', '5min', '15min', '30min', '1h', '4h', '1day', '1week', '1month',
-                         'M1', 'M5', 'M15', 'M30', 'H1', 'H4', 'D1', 'W1', 'MN']
-    if interval not in allowed_intervals:
-        interval = '1h'
+    auto_detect_mode = (symbol == 'AUTO' or interval == 'AUTO') and is_owner
+    
+    # ========== INPUT VALIDATION & SANITIZATION ==========
+    if not auto_detect_mode:
+        # Validate symbol (prevent injection)
+        allowed_symbols = ['XAU/USD', 'XAG/USD', 'EUR/USD', 'GBP/USD', 'USD/JPY', 'USD/CHF', 
+                           'AUD/USD', 'NZD/USD', 'USD/CAD', 'EUR/GBP', 'EUR/JPY', 'GBP/JPY',
+                           'BTC/USD', 'ETH/USD', 'US30', 'NAS100', 'SPX500']
+        # Allow custom symbols but sanitize them
+        if symbol not in allowed_symbols:
+            # Sanitize custom symbol: only allow alphanumeric, /, and -
+            import re
+            symbol = re.sub(r'[^A-Za-z0-9/\-]', '', symbol)[:20]  # Max 20 chars
+            if not symbol:
+                symbol = 'XAU/USD'
+        
+        # Validate interval
+        allowed_intervals = ['1min', '5min', '15min', '30min', '1h', '4h', '1day', '1week', '1month',
+                             'M1', 'M5', 'M15', 'M30', 'H1', 'H4', 'D1', 'W1', 'MN']
+        if interval not in allowed_intervals:
+            interval = '1h'
     
     light_mode = request.form.get('light_mode', 'false').lower() == 'true'
+    
+    # Owner always uses full mode
+    if is_owner:
+        light_mode = False
     
     # Validate file
     if file.filename == '':
@@ -2833,7 +2928,22 @@ def analyze_visual():
         image_data = file.read()
         
         # Get text analysis (ONE AI call only)
-        analysis = analyze_chart(image_data, symbol, interval, light_mode)
+        # For owner auto-detect mode, analyze_chart will detect symbol/timeframe first
+        analysis = analyze_chart(image_data, symbol, interval, light_mode, auto_detect=auto_detect_mode)
+        
+        # If auto-detect mode, extract detected symbol/timeframe from analysis
+        detected_symbol = symbol
+        detected_timeframe = interval
+        if auto_detect_mode:
+            # The analyze_chart function already updated symbol/interval internally
+            # We need to extract them from the analysis text
+            import re
+            symbol_match = re.search(r'\*\*Symbol[:\s]*\*?\*?\s*([A-Za-z0-9/\-]+)', analysis)
+            tf_match = re.search(r'\*\*Timeframe[:\s]*\*?\*?\s*([A-Za-z0-9]+)', analysis)
+            if symbol_match:
+                detected_symbol = symbol_match.group(1).strip()
+            if tf_match:
+                detected_timeframe = tf_match.group(1).strip()
         
         # Extract annotations FROM the analysis text (no second AI call)
         # This ensures Signal Card and Chart Markup are CONSISTENT
@@ -2841,7 +2951,7 @@ def analyze_visual():
         
         # ========== ACCURACY VALIDATION SYSTEM ==========
         # Get market data for confluence calculation (skip in light mode for speed)
-        market_data = None if light_mode else fetch_market_data(symbol, interval)
+        market_data = None if light_mode else fetch_market_data(detected_symbol, detected_timeframe)
         
         validation_result = None
         confluence_result = None
@@ -2854,7 +2964,7 @@ def analyze_visual():
                 market_data.get('lows', []),
                 market_data.get('closes', []),
                 market_data.get('volumes', [0] * len(market_data.get('closes', []))),
-                symbol
+                detected_symbol
             )
             
             # Extract trade levels from annotations
@@ -2882,8 +2992,8 @@ def analyze_visual():
             
             save_analysis(
                 user_id=user['id'],
-                symbol=symbol,
-                timeframe=interval,
+                symbol=detected_symbol,
+                timeframe=detected_timeframe,
                 signal_type=signal_type,
                 confidence=confidence,
                 entry=entry_price,
@@ -2894,13 +3004,21 @@ def analyze_visual():
         except Exception as save_err:
             print(f"[SAVE ANALYSIS] Error saving to history: {save_err}")
         
-        return jsonify({
+        response_data = {
             'analysis': analysis,
             'annotations': annotations,
             'image_base64': base64.b64encode(image_data).decode('utf-8'),
             'validation': validation_result,
             'confluence': confluence_result
-        })
+        }
+        
+        # Add detected values for owner auto-detect mode
+        if auto_detect_mode:
+            response_data['detected_symbol'] = detected_symbol
+            response_data['detected_timeframe'] = detected_timeframe
+            response_data['auto_detect'] = True
+        
+        return jsonify(response_data)
     except Exception as e:
         import traceback
         print(f"Error in analyze_visual: {traceback.format_exc()}")

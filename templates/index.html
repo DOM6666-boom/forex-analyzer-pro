@@ -2259,6 +2259,29 @@
             <div class="panel">
                 <h2 class="panel-title">📊 Chart Analysis</h2>
                 
+                {% if is_owner %}
+                <!-- OWNER MODE: Auto-detect Symbol & Timeframe from image -->
+                <div style="background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,107,0,0.1)); border: 1px solid rgba(255,215,0,0.3); border-radius: 12px; padding: 15px; margin-bottom: 15px;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <span style="font-size: 1.2rem;">🤖</span>
+                        <span style="color: #ffd700; font-weight: 700;">Owner Auto-Detect Mode</span>
+                    </div>
+                    <div style="font-size: 0.8rem; color: #b388ff;">
+                        AI will automatically detect Symbol & Timeframe from your chart screenshot
+                    </div>
+                    <div id="autoDetectResult" style="display: none; margin-top: 10px; padding: 10px; background: rgba(0,255,136,0.1); border-radius: 8px;">
+                        <span style="color: #00ff88; font-weight: 600;">Detected: </span>
+                        <span id="detectedSymbol" style="color: #00d4ff; font-weight: 700;">-</span>
+                        <span style="color: #8b949e;"> | </span>
+                        <span id="detectedTimeframe" style="color: #00d4ff; font-weight: 700;">-</span>
+                    </div>
+                </div>
+                <!-- Hidden inputs for owner (AI will fill these) -->
+                <input type="hidden" id="symbolSelect" value="AUTO">
+                <input type="hidden" id="intervalSelect" value="AUTO">
+                <input type="hidden" id="customSymbolInput" value="">
+                {% else %}
+                <!-- REGULAR USERS: Manual Symbol & Timeframe selection -->
                 <div class="form-group">
                     <label>Symbol</label>
                     <select id="symbolSelect" onchange="handleSymbolChange()">
@@ -2320,7 +2343,7 @@
                         <option value="1min">M1</option>
                         <option value="5min">M5</option>
                         <option value="15min">M15</option>
-                        {% if is_owner or is_paid %}
+                        {% if is_paid %}
                         <option value="30min">M30</option>
                         <option value="1h" selected>H1</option>
                         <option value="4h">H4</option>
@@ -2336,31 +2359,38 @@
                         <option value="1month" disabled>MN 🔒 PRO</option>
                         {% endif %}
                     </select>
-                    {% if not is_owner and not is_paid %}
+                    {% if not is_paid %}
                     <div style="font-size: 0.7rem; color: #ffd700; margin-top: 5px;">
                         🔒 M30+ timeframes require Pro/Premium
                     </div>
                     {% endif %}
                 </div>
+                {% endif %}
                 
+                {% if is_owner %}
+                <!-- Owner: Always Full mode, no toggle needed -->
+                <input type="hidden" id="lightModeBtn" value="full">
+                <input type="hidden" id="fullModeBtn" value="full">
+                {% else %}
                 <div class="form-group">
                     <label>Analysis Depth</label>
                     <div class="mode-toggle">
-                        <button type="button" class="mode-btn {% if is_owner or is_paid %}{% else %}active{% endif %}" id="lightModeBtn">⚡ Light (Fast)</button>
-                        <button type="button" class="mode-btn {% if is_owner or is_paid %}active{% endif %}" id="fullModeBtn">
+                        <button type="button" class="mode-btn {% if is_paid %}{% else %}active{% endif %}" id="lightModeBtn">⚡ Light (Fast)</button>
+                        <button type="button" class="mode-btn {% if is_paid %}active{% endif %}" id="fullModeBtn">
                             🔬 Full (744 Concepts)
-                            {% if not is_owner and not is_paid %}
+                            {% if not is_paid %}
                             <span style="font-size: 0.6rem; color: #ffd700;">🔒 PRO</span>
                             {% endif %}
                         </button>
                     </div>
                     <div style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 5px;">
                         Light: ~1K tokens | Full: ~5K tokens
-                        {% if not is_owner and not is_paid %}
+                        {% if not is_paid %}
                         <span style="color: #ffd700;">(Full requires Pro/Premium)</span>
                         {% endif %}
                     </div>
                 </div>
+                {% endif %}
                 
                 <!-- Chart Upload -->
                 <div id="singleUpload">
@@ -2529,7 +2559,23 @@
                     
                     signalCard.innerHTML = cardsHtml;
                     analysisContent.innerHTML = marked.parse(data.analysis);
-                    saveToHistory(signal, symbol, interval, data.analysis);
+                    
+                    // Handle auto-detect mode response (Owner only)
+                    if (data.auto_detect && data.detected_symbol && data.detected_timeframe) {
+                        const autoDetectResult = document.getElementById('autoDetectResult');
+                        const detectedSymbol = document.getElementById('detectedSymbol');
+                        const detectedTimeframe = document.getElementById('detectedTimeframe');
+                        if (autoDetectResult && detectedSymbol && detectedTimeframe) {
+                            detectedSymbol.textContent = data.detected_symbol;
+                            detectedTimeframe.textContent = data.detected_timeframe;
+                            autoDetectResult.style.display = 'block';
+                        }
+                        // Use detected values for history
+                        saveToHistory(signal, data.detected_symbol, data.detected_timeframe, data.analysis);
+                    } else {
+                        saveToHistory(signal, symbol, interval, data.analysis);
+                    }
+                    
                     loadUserInfo(); // Refresh user info after analysis
                     
                     if (data.annotations && data.image_base64) {
