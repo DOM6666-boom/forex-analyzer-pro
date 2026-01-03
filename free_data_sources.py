@@ -27,6 +27,180 @@ POLYGON_API_KEY = os.getenv("POLYGON_API_KEY", "M4FI863s2uqpT_2se1IpM9pTOpFiisy9
 ALPHA_VANTAGE_KEY = os.getenv("ALPHA_VANTAGE_KEY", "MKC0XZ0CSIEGWGR7")
 OANDA_API_KEY = os.getenv("OANDA_API_KEY", "1943576de5754119dc0f7200ea237315-9ca8c2e6f8b20ab9dcdae13868f5d8b1")
 OANDA_ACCOUNT_ID = os.getenv("OANDA_ACCOUNT_ID", "101-001-30129284-001")
+TWELVE_DATA_KEY = os.getenv("TWELVE_DATA_KEY", "6dd4eba1bd28496e81de43da2157c7b6")
+
+
+# ==================== REAL-TIME PRICE FETCHING ====================
+
+def fetch_realtime_price(symbol="XAU/USD"):
+    """
+    Fetch REAL-TIME price from multiple sources
+    Priority: Binance (crypto) > Twelve Data (forex/gold) > Alpha Vantage
+    Returns: {"price": float, "source": str, "timestamp": str}
+    """
+    symbol_upper = symbol.upper().replace(" ", "")
+    
+    # 1. CRYPTO - Use Binance (FREE, instant, accurate)
+    if any(crypto in symbol_upper for crypto in ['BTC', 'ETH', 'SOL', 'XRP', 'BNB', 'DOGE']):
+        binance_symbol = symbol_upper.replace("/", "").replace("USD", "USDT")
+        price = fetch_binance_price(binance_symbol)
+        if price:
+            return price
+    
+    # 2. GOLD/SILVER - Use Twelve Data or Binance PAXG
+    if 'XAU' in symbol_upper or 'GOLD' in symbol_upper:
+        # Try Twelve Data first
+        price = fetch_twelve_data_price("XAU/USD")
+        if price:
+            return price
+        # Fallback to PAXG (gold-backed token on Binance)
+        price = fetch_binance_price("PAXGUSDT")
+        if price:
+            price['note'] = "PAXG proxy for Gold"
+            return price
+    
+    if 'XAG' in symbol_upper or 'SILVER' in symbol_upper:
+        price = fetch_twelve_data_price("XAG/USD")
+        if price:
+            return price
+    
+    # 3. FOREX - Use Twelve Data
+    forex_pairs = ['EUR', 'GBP', 'JPY', 'CHF', 'AUD', 'NZD', 'CAD']
+    if any(pair in symbol_upper for pair in forex_pairs):
+        price = fetch_twelve_data_price(symbol)
+        if price:
+            return price
+    
+    # 4. Fallback - Try Alpha Vantage
+    price = fetch_alpha_vantage_price(symbol)
+    if price:
+        return price
+    
+    return None
+
+
+def fetch_binance_price(symbol="BTCUSDT"):
+    """
+    Fetch current price from Binance (FREE, no API key, instant)
+    """
+    try:
+        url = f"https://api.binance.com/api/v3/ticker/price"
+        params = {"symbol": symbol}
+        response = requests.get(url, params=params, timeout=3)
+        data = response.json()
+        
+        if "price" in data:
+            return {
+                "price": float(data["price"]),
+                "source": "Binance",
+                "symbol": symbol,
+                "timestamp": datetime.now().isoformat()
+            }
+    except Exception as e:
+        print(f"[PRICE] Binance error: {e}")
+    return None
+
+
+def fetch_twelve_data_price(symbol="XAU/USD"):
+    """
+    Fetch current price from Twelve Data (FREE tier: 800 calls/day)
+    Best for Forex and Gold
+    """
+    if not TWELVE_DATA_KEY:
+        return None
+    
+    try:
+        # Format symbol for Twelve Data
+        formatted = symbol.replace("/", "")
+        url = "https://api.twelvedata.com/price"
+        params = {
+            "symbol": formatted,
+            "apikey": TWELVE_DATA_KEY
+        }
+        response = requests.get(url, params=params, timeout=5)
+        data = response.json()
+        
+        if "price" in data:
+            return {
+                "price": float(data["price"]),
+                "source": "TwelveData",
+                "symbol": symbol,
+                "timestamp": datetime.now().isoformat()
+            }
+    except Exception as e:
+        print(f"[PRICE] Twelve Data error: {e}")
+    return None
+
+
+def fetch_alpha_vantage_price(symbol="EUR/USD"):
+    """
+    Fetch current price from Alpha Vantage (FREE: 25 calls/day)
+    """
+    if not ALPHA_VANTAGE_KEY:
+        return None
+    
+    try:
+        # Parse symbol
+        if "/" in symbol:
+            from_sym, to_sym = symbol.split("/")
+        else:
+            from_sym = symbol[:3]
+            to_sym = symbol[3:] if len(symbol) > 3 else "USD"
+        
+        url = "https://www.alphavantage.co/query"
+        params = {
+            "function": "CURRENCY_EXCHANGE_RATE",
+            "from_currency": from_sym,
+            "to_currency": to_sym,
+            "apikey": ALPHA_VANTAGE_KEY
+        }
+        response = requests.get(url, params=params, timeout=10)
+        data = response.json()
+        
+        if "Realtime Currency Exchange Rate" in data:
+            rate = data["Realtime Currency Exchange Rate"]
+            return {
+                "price": float(rate["5. Exchange Rate"]),
+                "source": "AlphaVantage",
+                "symbol": symbol,
+                "timestamp": rate["6. Last Refreshed"]
+            }
+    except Exception as e:
+        print(f"[PRICE] Alpha Vantage error: {e}")
+    return None
+
+
+def get_price_for_analysis(symbol="XAU/USD"):
+    """
+    Get real-time price formatted for AI analysis injection
+    Returns string to add to AI prompt
+    """
+    price_data = fetch_realtime_price(symbol)
+    
+    if price_data:
+        price = price_data['price']
+        source = price_data['source']
+        
+        # Format based on symbol type
+        if 'BTC' in symbol.upper():
+            formatted_price = f"{price:.2f}"
+        elif 'XAU' in symbol.upper() or 'GOLD' in symbol.upper():
+            formatted_price = f"{price:.2f}"
+        elif 'XAG' in symbol.upper():
+            formatted_price = f"{price:.3f}"
+        elif 'JPY' in symbol.upper():
+            formatted_price = f"{price:.3f}"
+        else:
+            formatted_price = f"{price:.5f}"
+        
+        return {
+            "price": price,
+            "formatted": formatted_price,
+            "source": source,
+            "prompt_text": f"\n\n⚠️ REAL-TIME PRICE (from {source}): {formatted_price}\nUse this EXACT price as reference. Your Entry/SL/TP should be based on this real price, NOT guessed from image.\n"
+        }
+    
+    return None
 
 # ==================== POLYGON.IO FREE ====================
 

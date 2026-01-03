@@ -1331,6 +1331,38 @@
             font-size: 0.85rem;
             font-weight: 400;
         }
+        
+        /* Real-time Price Display */
+        .realtime-price {
+            background: linear-gradient(135deg, rgba(0,255,136,0.15), rgba(0,212,255,0.15));
+            border: 1px solid rgba(0,255,136,0.3);
+            border-radius: 10px;
+            padding: 10px 15px;
+            margin: 12px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .realtime-price .price-label {
+            color: #00ff88;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .realtime-price .price-value {
+            color: #fff;
+            font-size: 1.2rem;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .realtime-price .price-source {
+            color: #888;
+            font-size: 0.75rem;
+        }
 
         .signal-grid {
             display: grid;
@@ -2561,7 +2593,8 @@
                             : (intervalSelect ? intervalSelect.value : 'H1');
                     }
                     
-                    let cardsHtml = createSignalCard(signal, displaySymbol, displayInterval);
+                    // Pass real-time price to signal card
+                    let cardsHtml = createSignalCard(signal, displaySymbol, displayInterval, data.realtime_price);
                     
                     if (data.validation) {
                         cardsHtml += createValidationCard(data.validation);
@@ -3449,9 +3482,24 @@
             return signal;
         }
 
-        function createSignalCard(signal, symbol, interval) {
+        function createSignalCard(signal, symbol, interval, realtimePrice = null) {
             const icon = signal.type === 'buy' ? '📈' : signal.type === 'sell' ? '📉' : '⏸️';
             const now = new Date();
+            
+            // Real-time price display
+            let priceHtml = '';
+            if (realtimePrice && realtimePrice.price) {
+                const price = typeof realtimePrice.price === 'number' 
+                    ? realtimePrice.price.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 5})
+                    : realtimePrice.price;
+                priceHtml = `
+                    <div class="realtime-price">
+                        <span class="price-label">💹 Live Price:</span>
+                        <span class="price-value">${price}</span>
+                        <span class="price-source">(${realtimePrice.source})</span>
+                    </div>
+                `;
+            }
             
             return `
                 <div class="signal-card ${signal.type}">
@@ -3465,6 +3513,8 @@
                     <div class="signal-symbol">
                         ${symbol} <span>• ${interval} • ${now.toLocaleString()}</span>
                     </div>
+                    
+                    ${priceHtml}
                     
                     <div class="signal-grid">
                         <div class="signal-item">

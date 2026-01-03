@@ -94,7 +94,9 @@ from free_data_sources import (
     fetch_oanda_orderbook,
     fetch_polygon_volume as fetch_polygon_data,
     fetch_alpha_vantage_forex as fetch_alpha_vantage_data,
-    fetch_all_free_data as get_comprehensive_market_data
+    fetch_all_free_data as get_comprehensive_market_data,
+    fetch_realtime_price,
+    get_price_for_analysis
 )
 
 # COMPLETE 744 Technical Analysis Modules
@@ -2365,11 +2367,25 @@ CURRENT_PRICE: 0"""
 ⚠️ **IMPORTANT:** Use these EXACT prices from MT5 data, NOT guessed from chart image!
 """
     
+    # ========== REAL-TIME PRICE INJECTION ==========
+    # Fetch real price from APIs to give AI accurate reference
+    realtime_price_info = ""
+    try:
+        price_data = get_price_for_analysis(symbol)
+        if price_data:
+            realtime_price_info = price_data['prompt_text']
+            print(f"[REALTIME PRICE] {symbol}: {price_data['formatted']} from {price_data['source']}")
+    except Exception as e:
+        print(f"[REALTIME PRICE] Error fetching: {e}")
+    
     if light_mode:
         # Light mode - just analyze the image, no technical report
         prompt = SIMPLE_PROMPT.format(symbol=symbol, interval=interval)
         if candlestick_info:
             prompt = candlestick_info + "\n\n" + prompt
+        # Add real-time price
+        if realtime_price_info:
+            prompt = realtime_price_info + prompt
         max_tokens = 1500
     else:
         # Full mode - include 744 concepts technical report
@@ -2377,6 +2393,9 @@ CURRENT_PRICE: 0"""
         prompt = MASTER_PROMPT.format(technical_data=technical_data)
         if candlestick_info:
             prompt = candlestick_info + "\n\n" + prompt
+        # Add real-time price
+        if realtime_price_info:
+            prompt = realtime_price_info + prompt
         max_tokens = 5000
     
     response = call_groq_with_fallback(
@@ -2908,6 +2927,15 @@ def analyze_visual():
             'validation': validation_result,
             'confluence': confluence_result
         }
+        
+        # Add real-time price to response
+        try:
+            realtime_price = fetch_realtime_price(detected_symbol)
+            if realtime_price:
+                response_data['realtime_price'] = realtime_price
+                print(f"[API RESPONSE] Real-time price: {realtime_price['price']} from {realtime_price['source']}")
+        except Exception as price_err:
+            print(f"[API RESPONSE] Error fetching real-time price: {price_err}")
         
         # Add detected values for owner auto-detect mode
         if auto_detect_mode:
