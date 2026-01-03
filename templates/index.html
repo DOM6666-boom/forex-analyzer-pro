@@ -2249,8 +2249,10 @@
         
         <div class="main-grid">
             <!-- Define user tier variables at the top for reuse -->
-            {% set is_owner = user and 'vanndom300' in user.email %}
-            {% set is_paid = user and (user.tier == 'pro' or user.tier == 'premium') %}
+            {% set user_email = user.email|default('') if user else '' %}
+            {% set user_tier = user.tier|default('free') if user else 'free' %}
+            {% set is_owner = user and 'vanndom300' in user_email.lower() %}
+            {% set is_paid = user and (user_tier == 'pro' or user_tier == 'premium') %}
             
             <div class="panel">
                 <h2 class="panel-title">📊 Chart Analysis</h2>
@@ -2342,8 +2344,8 @@
                 <div class="form-group">
                     <label>Analysis Depth</label>
                     <div class="mode-toggle">
-                        <button type="button" class="mode-btn" id="lightModeBtn" onclick="setAnalysisDepth('light')">⚡ Light (Fast)</button>
-                        <button type="button" class="mode-btn" id="fullModeBtn" onclick="setAnalysisDepth('full')">
+                        <button type="button" class="mode-btn" id="lightModeBtn">⚡ Light (Fast)</button>
+                        <button type="button" class="mode-btn" id="fullModeBtn">
                             🔬 Full (744 Concepts)
                             {% if not is_owner and not is_paid %}
                             <span style="font-size: 0.6rem; color: #ffd700;">🔒 PRO</span>
@@ -2931,8 +2933,8 @@
         }
         
         // User tier from server
-        const userTier = '{{ user.tier if user else "free" }}';
-        const userEmail = '{{ user.email if user else "" }}';
+        const userTier = '{{ (user.tier if user and user.tier else "free")|e }}';
+        const userEmail = '{{ (user.email if user and user.email else "")|e }}';
         
         // Check owner and paid status directly in JavaScript (more reliable)
         const isOwner = userEmail.toLowerCase().includes('vanndom300');
@@ -2959,9 +2961,10 @@
                 return;
             }
             
+            // Owner, Pro, Premium can use both modes freely
             // Free users can only use Light mode
             if (depth === 'full' && !canUseFullMode) {
-                console.log('[ANALYSIS DEPTH] Blocked - user cannot use full mode');
+                console.log('[ANALYSIS DEPTH] Blocked - free user cannot use full mode');
                 alert('🔒 Full (744 Concepts) requires Pro or Premium plan.\n\nUpgrade now!');
                 window.location.href = '/pricing';
                 return;
@@ -2976,41 +2979,53 @@
             
             if (depth === 'light') {
                 lightBtn.classList.add('active');
+                console.log('[ANALYSIS DEPTH] ✅ Switched to Light mode');
             } else {
                 fullBtn.classList.add('active');
+                console.log('[ANALYSIS DEPTH] ✅ Switched to Full mode');
             }
-            
-            console.log('[ANALYSIS DEPTH] Success! Now using:', depth, 'lightMode:', lightMode);
         }
         
-        // Initialize on page load
-        (function initAnalysisDepth() {
+        // Initialize buttons with event listeners (more reliable than onclick)
+        (function initAnalysisDepthButtons() {
             const lightBtn = document.getElementById('lightModeBtn');
             const fullBtn = document.getElementById('fullModeBtn');
             
             if (!lightBtn || !fullBtn) {
-                console.log('[ANALYSIS DEPTH] Buttons not found, retrying...');
-                setTimeout(initAnalysisDepth, 100);
+                console.log('[ANALYSIS DEPTH] Buttons not found, retrying in 100ms...');
+                setTimeout(initAnalysisDepthButtons, 100);
                 return;
             }
+            
+            // Add click event listeners
+            lightBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log('[ANALYSIS DEPTH] Light button clicked');
+                setAnalysisDepth('light');
+            });
+            
+            fullBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log('[ANALYSIS DEPTH] Full button clicked');
+                setAnalysisDepth('full');
+            });
             
             // Remove any existing active class first
             lightBtn.classList.remove('active');
             fullBtn.classList.remove('active');
             
+            // Set initial state based on user tier
             if (canUseFullMode) {
-                // Owner/Pro/Premium: default to Full mode
+                // Owner/Pro/Premium: default to Full mode, can switch freely
                 lightMode = false;
                 fullBtn.classList.add('active');
-                console.log('[ANALYSIS DEPTH] Initialized for paid user - Full mode');
+                console.log('[ANALYSIS DEPTH] ✅ Initialized for PAID user - Full mode default, can switch freely');
             } else {
                 // Free users: Light mode only
                 lightMode = true;
                 lightBtn.classList.add('active');
-                console.log('[ANALYSIS DEPTH] Initialized for free user - Light mode only');
+                console.log('[ANALYSIS DEPTH] ✅ Initialized for FREE user - Light mode only');
             }
-            
-            console.log('[ANALYSIS DEPTH] Init complete. canUseFullMode:', canUseFullMode, 'lightMode:', lightMode);
         })();
         
         // ========== CUSTOM SYMBOL HANDLER ==========
