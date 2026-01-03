@@ -8,8 +8,16 @@ from flask import Flask, request, jsonify, render_template, redirect, url_for, s
 from groq import Groq
 from dotenv import load_dotenv
 
-# Version: 2026-01-03-v1 - Enterprise Security Update
-APP_VERSION = "2026-01-03-v1"
+# Version: 2026-01-03-v2 - Persistent Session Fix
+APP_VERSION = "2026-01-03-v2"
+
+# Flask-Session for persistent sessions (survives server restart)
+try:
+    from flask_session import Session
+    FLASK_SESSION_AVAILABLE = True
+except ImportError:
+    FLASK_SESSION_AVAILABLE = False
+    print("⚠️ Flask-Session not installed. Run: pip install flask-session")
 
 # Rate Limiting - Enterprise Grade
 try:
@@ -154,6 +162,31 @@ app.secret_key = os.getenv('SECRET_KEY', 'your-super-secret-key-change-in-produc
 # Detect if running on Render (production) or locally
 IS_PRODUCTION = os.environ.get('RENDER') is not None
 
+# ========== PERSISTENT SESSION SETUP ==========
+# Use SQLite-based sessions to survive server restarts on Render free tier
+if FLASK_SESSION_AVAILABLE:
+    # Session storage directory
+    SESSION_DIR = '/opt/render/project/src/data/sessions' if IS_PRODUCTION else 'flask_sessions'
+    try:
+        os.makedirs(SESSION_DIR, exist_ok=True)
+        print(f"[SESSION] ✅ Session directory: {SESSION_DIR}")
+    except Exception as e:
+        SESSION_DIR = 'flask_sessions'
+        os.makedirs(SESSION_DIR, exist_ok=True)
+        print(f"[SESSION] ⚠️ Using fallback session dir: {SESSION_DIR}")
+    
+    app.config['SESSION_TYPE'] = 'filesystem'
+    app.config['SESSION_FILE_DIR'] = SESSION_DIR
+    app.config['SESSION_PERMANENT'] = True
+    app.config['SESSION_USE_SIGNER'] = True  # Sign session cookies for security
+    app.config['SESSION_FILE_THRESHOLD'] = 500  # Max sessions before cleanup
+    
+    # Initialize Flask-Session
+    Session(app)
+    print("✅ Flask-Session enabled (filesystem-based, persistent)")
+else:
+    print("⚠️ Flask-Session not available - sessions will be lost on restart!")
+
 # ========== ENTERPRISE SECURITY SETUP ==========
 
 # Rate Limiting - Prevent API abuse
@@ -193,13 +226,13 @@ if IS_PRODUCTION:
 app.config['SESSION_COOKIE_SECURE'] = IS_PRODUCTION  # True on Render (HTTPS), False locally
 app.config['SESSION_COOKIE_HTTPONLY'] = True  # Prevent JavaScript access to cookies
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # CSRF protection
-app.config['PERMANENT_SESSION_LIFETIME'] = 2592000  # 30 days session (was 24 hours)
+app.config['PERMANENT_SESSION_LIFETIME'] = 2592000  # 30 days session
 
 # Remember user for 30 days
 from datetime import timedelta
 app.permanent_session_lifetime = timedelta(days=30)
 
-print(f"[SESSION] Production mode: {IS_PRODUCTION}, Secure cookies: {IS_PRODUCTION}, Session lifetime: 30 days")
+print(f"[SESSION] Production: {IS_PRODUCTION}, Secure cookies: {IS_PRODUCTION}, Lifetime: 30 days, Persistent: {FLASK_SESSION_AVAILABLE}")
 
 # Security Headers - Enterprise Grade
 @app.after_request
@@ -2391,7 +2424,7 @@ def register():
     # Create user
     user_id = create_user(email, password, name, provider='email')
     if user_id:
-        session.permanent = True  # Use PERMANENT_SESSION_LIFETIME (24 hours)
+        session.permanent = True  # Use PERMANENT_SESSION_LIFETIME (30 days)
         session['user_id'] = user_id
         app.logger.info(f"[REGISTER] New user registered: {email}")
         return redirect('/')
@@ -2419,7 +2452,7 @@ def login():
     if not verify_password(password, user.get('password_hash', '')):
         return redirect('/login?error=Invalid email or password')
     
-    session.permanent = True  # Use PERMANENT_SESSION_LIFETIME (24 hours)
+    session.permanent = True  # Use PERMANENT_SESSION_LIFETIME (30 days)
     session['user_id'] = user['id']
     update_user_login(user['id'])
     return redirect('/')
@@ -2492,7 +2525,7 @@ def google_callback():
         # Check if user exists
         user = get_user_by_email(email)
         
-        session.permanent = True  # Use PERMANENT_SESSION_LIFETIME (24 hours)
+        session.permanent = True  # Use PERMANENT_SESSION_LIFETIME (30 days)
         if user:
             # Update existing user
             update_user_google(email, name, picture)
