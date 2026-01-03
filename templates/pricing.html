@@ -5,502 +5,138 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pricing - Pro Forex Analyzer</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Stripe.js -->
+    <script src="https://js.stripe.com/v3/"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
         body {
             font-family: 'Inter', sans-serif;
             background: #050510;
             min-height: 100vh;
             color: #e6edf3;
             overflow-x: hidden;
-            position: relative;
         }
         
-        /* ========== JUJUTSU KAISEN CURSED ENERGY BACKGROUND ========== */
+        /* JJK Background */
         .jjk-background {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            overflow: hidden;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0;
             background: radial-gradient(ellipse at center, #0a0520 0%, #050510 100%);
         }
-        
-        /* Domain Expansion Base */
         .domain-expansion {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(circle at 20% 80%, rgba(138, 43, 226, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(75, 0, 130, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 50% 50%, rgba(148, 0, 211, 0.1) 0%, transparent 70%);
+            position: absolute; width: 100%; height: 100%;
+            background: radial-gradient(circle at 20% 80%, rgba(138,43,226,0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(75,0,130,0.15) 0%, transparent 50%);
             animation: domainPulse 8s ease-in-out infinite;
         }
+        @keyframes domainPulse { 0%,100%{opacity:0.6;transform:scale(1)} 50%{opacity:1;transform:scale(1.05)} }
         
-        @keyframes domainPulse {
-            0%, 100% { opacity: 0.6; transform: scale(1); }
-            50% { opacity: 1; transform: scale(1.05); }
-        }
-        
-        /* Cursed Energy Orbs */
         .cursed-orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(60px);
+            position: absolute; border-radius: 50%; filter: blur(60px);
             animation: orbFloat 20s ease-in-out infinite;
         }
-        
-        .orb-1 {
-            width: 400px; height: 400px;
-            background: radial-gradient(circle, rgba(138, 43, 226, 0.4) 0%, transparent 70%);
-            top: -100px; left: -100px;
-            animation-delay: 0s;
-        }
-        
-        .orb-2 {
-            width: 500px; height: 500px;
-            background: radial-gradient(circle, rgba(75, 0, 130, 0.35) 0%, transparent 70%);
-            bottom: -150px; right: -150px;
-            animation-delay: -5s;
-        }
-        
-        .orb-3 {
-            width: 300px; height: 300px;
-            background: radial-gradient(circle, rgba(148, 0, 211, 0.3) 0%, transparent 70%);
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            animation-delay: -10s;
-        }
-        
-        .orb-4 {
-            width: 250px; height: 250px;
-            background: radial-gradient(circle, rgba(186, 85, 211, 0.25) 0%, transparent 70%);
-            top: 20%; right: 20%;
-            animation-delay: -3s;
-        }
-        
-        @keyframes orbFloat {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            25% { transform: translate(30px, -30px) scale(1.1); }
-            50% { transform: translate(-20px, 20px) scale(0.95); }
-            75% { transform: translate(20px, 30px) scale(1.05); }
-        }
-        
-        /* Cursed Energy Streams */
-        .energy-stream {
-            position: absolute;
-            width: 2px;
-            height: 100%;
-            background: linear-gradient(to bottom, 
-                transparent 0%, 
-                rgba(138, 43, 226, 0.6) 20%, 
-                rgba(148, 0, 211, 0.8) 50%, 
-                rgba(138, 43, 226, 0.6) 80%, 
-                transparent 100%);
-            animation: streamFlow 3s linear infinite;
-            opacity: 0.5;
-        }
-        
-        .stream-1 { left: 10%; animation-delay: 0s; }
-        .stream-2 { left: 25%; animation-delay: -0.5s; height: 80%; top: 10%; }
-        .stream-3 { left: 40%; animation-delay: -1s; }
-        .stream-4 { left: 60%; animation-delay: -1.5s; height: 90%; top: 5%; }
-        .stream-5 { left: 75%; animation-delay: -2s; }
-        .stream-6 { left: 90%; animation-delay: -2.5s; height: 85%; top: 8%; }
-        
-        @keyframes streamFlow {
-            0% { transform: translateY(-100%) scaleY(0.5); opacity: 0; }
-            50% { opacity: 0.6; }
-            100% { transform: translateY(100%) scaleY(0.5); opacity: 0; }
-        }
-        
-        /* Floating Particles - Cursed Energy Fragments */
-        .particle {
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            background: rgba(186, 85, 211, 0.8);
-            border-radius: 50%;
-            box-shadow: 0 0 10px rgba(138, 43, 226, 0.8), 0 0 20px rgba(148, 0, 211, 0.5);
-            animation: particleFloat 15s linear infinite;
-        }
-        
-        @keyframes particleFloat {
-            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
-        }
-        
-        /* Hexagonal Grid Pattern */
-        .hex-grid {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%239C27B0' fill-opacity='0.03'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8h-2v-6.85L0 35.81v-2.3zM15 0v7.5L27.99 15H28v-2.31h-.01L17 6.35V0h-2zm0 49v-8l12.99-7.5H28v2.31h-.01L17 42.15V49h-2z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-            opacity: 0.5;
-            animation: gridPulse 4s ease-in-out infinite;
-        }
-        
-        @keyframes gridPulse {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 0.6; }
-        }
-        
-        /* Sukuna's Malevolent Shrine Effect */
-        .shrine-lines {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: 
-                linear-gradient(90deg, transparent 49.5%, rgba(138, 43, 226, 0.1) 50%, transparent 50.5%),
-                linear-gradient(0deg, transparent 49.5%, rgba(138, 43, 226, 0.1) 50%, transparent 50.5%);
-            background-size: 100px 100px;
-            animation: shrineRotate 60s linear infinite;
-        }
-        
-        @keyframes shrineRotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        /* Main Content Styles */
-        .container { 
-            max-width: 1200px; 
-            margin: 0 auto; 
-            padding: 20px;
-            position: relative;
-            z-index: 10;
-        }
-        
+        .orb-1 { width:400px;height:400px;background:radial-gradient(circle,rgba(138,43,226,0.4) 0%,transparent 70%);top:-100px;left:-100px; }
+        .orb-2 { width:500px;height:500px;background:radial-gradient(circle,rgba(75,0,130,0.35) 0%,transparent 70%);bottom:-150px;right:-150px;animation-delay:-5s; }
+        @keyframes orbFloat { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-20px,20px) scale(0.95)} }
+
+        /* Container */
+        .container { max-width:1200px; margin:0 auto; padding:20px; position:relative; z-index:10; }
         .back-btn {
-            display: inline-flex; align-items: center; gap: 8px;
-            color: #b388ff; text-decoration: none; margin-bottom: 30px;
-            padding: 12px 24px; border-radius: 12px;
-            background: rgba(138, 43, 226, 0.1); 
-            border: 1px solid rgba(138, 43, 226, 0.3);
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
+            display:inline-flex; align-items:center; gap:8px; color:#b388ff; text-decoration:none;
+            margin-bottom:30px; padding:12px 24px; border-radius:12px;
+            background:rgba(138,43,226,0.1); border:1px solid rgba(138,43,226,0.3);
+            transition:all 0.3s ease;
         }
+        .back-btn:hover { background:rgba(138,43,226,0.2); box-shadow:0 0 20px rgba(138,43,226,0.3); }
         
-        .back-btn:hover { 
-            color: #e1bee7; 
-            background: rgba(138, 43, 226, 0.2);
-            border-color: rgba(186, 85, 211, 0.5);
-            box-shadow: 0 0 20px rgba(138, 43, 226, 0.3);
-        }
-        
-        .page-header { text-align: center; margin-bottom: 50px; }
-        
+        .page-header { text-align:center; margin-bottom:50px; }
         .page-title {
-            font-size: 3.5rem; 
-            font-weight: 800;
-            background: linear-gradient(135deg, #e1bee7, #ba68c8, #9c27b0, #7b1fa2);
-            background-size: 300% 300%;
-            -webkit-background-clip: text; 
-            background-clip: text;
-            -webkit-text-fill-color: transparent; 
-            margin-bottom: 15px;
-            animation: titleGlow 5s ease-in-out infinite;
-            text-shadow: 0 0 40px rgba(138, 43, 226, 0.5);
+            font-size:3rem; font-weight:800;
+            background:linear-gradient(135deg,#e1bee7,#ba68c8,#9c27b0);
+            -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
         }
+        .page-subtitle { color:#b388ff; font-size:1.1rem; margin-top:10px; }
         
-        @keyframes titleGlow {
-            0%, 100% { background-position: 0% 50%; filter: brightness(1); }
-            50% { background-position: 100% 50%; filter: brightness(1.2); }
-        }
-        
-        .page-subtitle { 
-            color: #b388ff; 
-            font-size: 1.1rem;
-            text-shadow: 0 0 10px rgba(138, 43, 226, 0.3);
-        }
-        
-        /* Pricing Cards */
-        .pricing-grid { 
-            display: grid; 
-            grid-template-columns: repeat(3, 1fr); 
-            gap: 25px; 
-            margin-bottom: 50px; 
-        }
-        
-        @media (max-width: 900px) { 
-            .pricing-grid { 
-                grid-template-columns: 1fr; 
-                max-width: 400px; 
-                margin: 0 auto 50px; 
-            } 
-        }
+        /* Pricing Grid */
+        .pricing-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:25px; margin-bottom:50px; }
+        @media(max-width:900px) { .pricing-grid { grid-template-columns:1fr; max-width:400px; margin:0 auto 50px; } }
         
         .pricing-card {
-            background: rgba(20, 10, 40, 0.7);
-            backdrop-filter: blur(20px);
-            border-radius: 24px; 
-            padding: 35px 30px;
-            border: 1px solid rgba(138, 43, 226, 0.2);
-            position: relative;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            overflow: hidden;
+            background:rgba(20,10,40,0.7); backdrop-filter:blur(20px); border-radius:24px;
+            padding:35px 30px; border:1px solid rgba(138,43,226,0.2); position:relative;
+            transition:all 0.4s ease;
         }
-        
-        .pricing-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, rgba(138, 43, 226, 0.5), transparent);
-            animation: cardScan 3s linear infinite;
-        }
-        
-        @keyframes cardScan {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
-        }
-        
-        .pricing-card:hover { 
-            transform: translateY(-15px) scale(1.02);
-            border-color: rgba(186, 85, 211, 0.5);
-            box-shadow: 
-                0 25px 50px rgba(138, 43, 226, 0.3),
-                0 0 100px rgba(148, 0, 211, 0.2),
-                inset 0 0 30px rgba(138, 43, 226, 0.1);
-        }
-        
-        .pricing-card.popular { 
-            border-color: rgba(0, 212, 255, 0.4);
-            transform: scale(1.05);
-            background: rgba(20, 10, 40, 0.85);
-        }
-        
-        .pricing-card.popular:hover {
-            transform: scale(1.08) translateY(-10px);
-            box-shadow: 
-                0 30px 60px rgba(0, 212, 255, 0.3),
-                0 0 120px rgba(0, 212, 255, 0.2);
-        }
-        
-        .pricing-card.premium-card { 
-            background: linear-gradient(135deg, rgba(30, 15, 50, 0.9), rgba(60, 30, 10, 0.3));
-            border-color: rgba(255, 215, 0, 0.3);
-        }
-        
-        .pricing-card.premium-card:hover {
-            box-shadow: 
-                0 30px 60px rgba(255, 215, 0, 0.2),
-                0 0 120px rgba(255, 165, 0, 0.15);
-        }
+        .pricing-card:hover { transform:translateY(-10px); border-color:rgba(186,85,211,0.5); box-shadow:0 25px 50px rgba(138,43,226,0.3); }
+        .pricing-card.popular { border-color:rgba(0,212,255,0.4); transform:scale(1.05); }
+        .pricing-card.popular:hover { transform:scale(1.08) translateY(-10px); }
+        .pricing-card.premium-card { background:linear-gradient(135deg,rgba(30,15,50,0.9),rgba(60,30,10,0.3)); border-color:rgba(255,215,0,0.3); }
         
         .popular-badge {
-            position: absolute; 
-            top: -1px; 
-            left: 50%; 
-            transform: translateX(-50%);
-            background: linear-gradient(135deg, #00d4ff, #00ff88);
-            color: #0a0a1a;
-            padding: 8px 25px; 
-            border-radius: 0 0 15px 15px;
-            font-size: 0.75rem; 
-            font-weight: 700; 
-            text-transform: uppercase;
-            box-shadow: 0 5px 20px rgba(0, 212, 255, 0.4);
+            position:absolute; top:-1px; left:50%; transform:translateX(-50%);
+            background:linear-gradient(135deg,#00d4ff,#00ff88); color:#0a0a1a;
+            padding:8px 25px; border-radius:0 0 15px 15px; font-size:0.75rem; font-weight:700;
         }
         
-        .tier-name { 
-            font-size: 1.4rem; 
-            font-weight: 700; 
-            color: #e1bee7; 
-            margin-bottom: 10px; 
-        }
+        .tier-name { font-size:1.4rem; font-weight:700; color:#e1bee7; margin-bottom:10px; }
+        .tier-name.premium { background:linear-gradient(135deg,#ffd700,#ff8c00); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
         
-        .tier-name.premium { 
-            background: linear-gradient(135deg, #ffd700, #ff8c00); 
-            -webkit-background-clip: text; 
-            background-clip: text; 
-            -webkit-text-fill-color: transparent;
-            animation: goldShimmer 3s ease-in-out infinite;
-        }
+        .tier-price { font-size:3rem; font-weight:800; margin-bottom:25px; }
+        .tier-price.free { color:#b388ff; }
+        .tier-price.pro { background:linear-gradient(135deg,#00d4ff,#00ff88); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+        .tier-price.premium { background:linear-gradient(135deg,#ffd700,#ff8c00); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+        .tier-price span { font-size:0.9rem; color:#7c4dff; }
         
-        @keyframes goldShimmer {
-            0%, 100% { filter: brightness(1) drop-shadow(0 0 5px rgba(255, 215, 0, 0.5)); }
-            50% { filter: brightness(1.3) drop-shadow(0 0 15px rgba(255, 215, 0, 0.8)); }
-        }
-        
-        .tier-price { 
-            font-size: 3rem; 
-            font-weight: 800; 
-            margin-bottom: 25px; 
-        }
-        
-        .tier-price.free { color: #b388ff; }
-        
-        .tier-price.pro { 
-            background: linear-gradient(135deg, #00d4ff, #00ff88); 
-            -webkit-background-clip: text; 
-            background-clip: text; 
-            -webkit-text-fill-color: transparent;
-        }
-        
-        .tier-price.premium { 
-            background: linear-gradient(135deg, #ffd700, #ff8c00); 
-            -webkit-background-clip: text; 
-            background-clip: text; 
-            -webkit-text-fill-color: transparent;
-        }
-        
-        .tier-price span { font-size: 0.9rem; color: #7c4dff; }
-        
-        .tier-features { list-style: none; margin-bottom: 30px; }
-        
-        .tier-features li { 
-            padding: 12px 0; 
-            border-bottom: 1px solid rgba(138, 43, 226, 0.15);
-            display: flex; 
-            align-items: center; 
-            gap: 10px; 
-            font-size: 0.9rem;
-            color: #d1c4e9;
-        }
-        
-        .check { color: #00ff88; text-shadow: 0 0 10px rgba(0, 255, 136, 0.5); }
-        .x { color: #7c4dff; opacity: 0.5; }
-        
+        .tier-features { list-style:none; margin-bottom:30px; }
+        .tier-features li { padding:12px 0; border-bottom:1px solid rgba(138,43,226,0.15); display:flex; align-items:center; gap:10px; font-size:0.9rem; color:#d1c4e9; }
+        .check { color:#00ff88; } .x { color:#7c4dff; opacity:0.5; }
+
         /* Buttons */
         .tier-btn {
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            gap: 8px;
-            width: 100%; 
-            padding: 16px; 
-            border: none; 
-            border-radius: 14px;
-            font-size: 1rem; 
-            font-weight: 700; 
-            cursor: pointer; 
-            text-decoration: none;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
+            display:flex; align-items:center; justify-content:center; gap:8px;
+            width:100%; padding:16px; border:none; border-radius:14px;
+            font-size:1rem; font-weight:700; cursor:pointer; text-decoration:none;
+            transition:all 0.3s ease;
         }
+        .tier-btn.current { background:rgba(138,43,226,0.2); color:#b388ff; border:2px solid rgba(138,43,226,0.4); }
+        .tier-btn.upgrade { background:linear-gradient(135deg,#00d4ff,#00ff88); color:#0a0a1a; }
+        .tier-btn.upgrade:hover { transform:translateY(-3px); box-shadow:0 15px 40px rgba(0,212,255,0.4); }
+        .tier-btn.premium-btn { background:linear-gradient(135deg,#ffd700,#ff8c00); }
+        .tier-btn.premium-btn:hover { box-shadow:0 15px 40px rgba(255,215,0,0.4); }
+        .tier-btn.free-btn { background:rgba(138,43,226,0.15); color:#b388ff; border:1px solid rgba(138,43,226,0.3); }
+        .tier-btn:disabled { opacity:0.6; cursor:not-allowed; }
         
-        .tier-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s ease;
+        /* Payment Methods */
+        .payment-methods {
+            display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:40px;
         }
+        @media(max-width:700px) { .payment-methods { grid-template-columns:1fr; } }
         
-        .tier-btn:hover::before {
-            left: 100%;
+        .payment-card {
+            background:rgba(20,10,40,0.7); backdrop-filter:blur(20px); border-radius:20px;
+            padding:30px; border:2px solid rgba(138,43,226,0.2); text-align:center;
         }
+        .payment-card.stripe { border-color:rgba(99,91,255,0.4); }
+        .payment-card.local { border-color:rgba(0,128,0,0.4); }
+        .payment-card h3 { color:#e1bee7; margin-bottom:15px; font-size:1.2rem; }
+        .payment-card p { color:#b388ff; font-size:0.9rem; margin-bottom:15px; }
+        .payment-icons { font-size:2rem; margin-bottom:15px; }
         
-        .tier-btn.current { 
-            background: rgba(138, 43, 226, 0.2);
-            color: #b388ff;
-            border: 2px solid rgba(138, 43, 226, 0.4);
-        }
-        
-        .tier-btn.upgrade { 
-            background: linear-gradient(135deg, #00d4ff, #00ff88);
-            color: #0a0a1a;
-        }
-        
-        .tier-btn.upgrade:hover { 
-            transform: translateY(-3px);
-            box-shadow: 0 15px 40px rgba(0, 212, 255, 0.4);
-        }
-        
-        .tier-btn.premium-btn { 
-            background: linear-gradient(135deg, #ffd700, #ff8c00);
-        }
-        
-        .tier-btn.premium-btn:hover {
-            box-shadow: 0 15px 40px rgba(255, 215, 0, 0.4);
-        }
-        
-        .tier-btn.free-btn { 
-            background: rgba(138, 43, 226, 0.15);
-            color: #b388ff;
-            border: 1px solid rgba(138, 43, 226, 0.3);
-        }
-        
-        .tier-btn.free-btn:hover {
-            background: rgba(138, 43, 226, 0.25);
-        }
-        
-        /* Payment Section */
-        .payment-section {
-            background: rgba(20, 10, 40, 0.7);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 40px;
-            border: 2px solid rgba(0, 128, 0, 0.3);
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .payment-section::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(0, 255, 136, 0.05) 0%, transparent 50%);
-            animation: paymentGlow 5s ease-in-out infinite;
-        }
-        
-        @keyframes paymentGlow {
-            0%, 100% { transform: translate(0, 0); }
-            50% { transform: translate(10%, 10%); }
-        }
-        
-        /* Guarantee Section */
+        /* Guarantee */
         .guarantee-section {
-            text-align: center;
-            padding: 30px;
-            background: rgba(0, 255, 136, 0.05);
-            border-radius: 20px;
-            border: 1px solid rgba(0, 255, 136, 0.2);
-            backdrop-filter: blur(10px);
+            text-align:center; padding:30px; background:rgba(0,255,136,0.05);
+            border-radius:20px; border:1px solid rgba(0,255,136,0.2);
         }
+        
+        /* Loading */
+        .loading { display:inline-block; width:20px; height:20px; border:2px solid transparent;
+            border-top-color:#0a0a1a; border-radius:50%; animation:spin 1s linear infinite; }
+        @keyframes spin { to { transform:rotate(360deg); } }
     </style>
 </head>
 <body>
-    <!-- JJK Cursed Energy Background -->
     <div class="jjk-background">
         <div class="domain-expansion"></div>
-        <div class="hex-grid"></div>
-        <div class="shrine-lines"></div>
-        
-        <!-- Cursed Energy Orbs -->
         <div class="cursed-orb orb-1"></div>
         <div class="cursed-orb orb-2"></div>
-        <div class="cursed-orb orb-3"></div>
-        <div class="cursed-orb orb-4"></div>
-        
-        <!-- Energy Streams -->
-        <div class="energy-stream stream-1"></div>
-        <div class="energy-stream stream-2"></div>
-        <div class="energy-stream stream-3"></div>
-        <div class="energy-stream stream-4"></div>
-        <div class="energy-stream stream-5"></div>
-        <div class="energy-stream stream-6"></div>
-        
-        <!-- Particles will be added by JS -->
-        <div id="particles"></div>
     </div>
 
     <div class="container">
@@ -545,7 +181,7 @@
                 {% if user and user.tier == 'pro' %}
                 <button class="tier-btn current">✓ Current Plan</button>
                 {% elif user %}
-                <button class="tier-btn upgrade" onclick="openPaymentModal('pro', 19.99)">🚀 Upgrade to Pro</button>
+                <button class="tier-btn upgrade" id="proPlanBtn" onclick="selectPlan('pro')">🚀 Upgrade to Pro</button>
                 {% else %}
                 <a href="/login" class="tier-btn upgrade">Login to Upgrade</a>
                 {% endif %}
@@ -565,126 +201,168 @@
                 {% if user and user.tier == 'premium' %}
                 <button class="tier-btn current">✓ Current Plan</button>
                 {% elif user %}
-                <button class="tier-btn upgrade premium-btn" onclick="openPaymentModal('premium', 49.99)">💎 Go Premium</button>
+                <button class="tier-btn upgrade premium-btn" id="premiumPlanBtn" onclick="selectPlan('premium')">💎 Go Premium</button>
                 {% else %}
                 <a href="/login" class="tier-btn upgrade premium-btn">Login to Upgrade</a>
                 {% endif %}
             </div>
         </div>
 
-        <!-- Payment Method -->
-        <div class="payment-section">
-            <h3 style="color: #00ff88; margin-bottom: 20px; font-size: 1.3rem; position: relative; z-index: 1;">🏛️ Payment via ACLEDA Bank (KHQR)</h3>
-            <p style="color: #b388ff; margin-bottom: 15px; position: relative; z-index: 1;">Scan QR code with any banking app supporting KHQR</p>
-            <div style="display: inline-block; background: rgba(0, 128, 0, 0.15); padding: 15px 30px; border-radius: 12px; border: 1px solid rgba(0, 128, 0, 0.3); position: relative; z-index: 1;">
-                <div style="font-weight: 600; color: #00ff88;">Account: ORM BOUDOM</div>
+        <!-- Payment Methods Section -->
+        <div class="payment-methods" id="paymentMethods" style="display:none;">
+            <div class="payment-card stripe">
+                <div class="payment-icons">💳</div>
+                <h3>Pay with Card (Global)</h3>
+                <p>Visa, Mastercard, Amex, Apple Pay, Google Pay</p>
+                <button class="tier-btn upgrade" id="stripePayBtn" onclick="payWithStripe()">
+                    <span id="stripeBtnText">💳 Pay with Card</span>
+                </button>
             </div>
+            
+            <div class="payment-card local">
+                <div class="payment-icons">🏦</div>
+                <h3>Pay with KHQR (Cambodia)</h3>
+                <p>ACLEDA, ABA, Wing, and all KHQR banks</p>
+                <button class="tier-btn upgrade" style="background:linear-gradient(135deg,#00ff88,#00d4ff);" onclick="openKHQRModal()">
+                    🇰🇭 Pay with KHQR
+                </button>
+            </div>
+        </div>
+        
+        <!-- Selected Plan Info -->
+        <div id="selectedPlanInfo" style="display:none; text-align:center; margin-bottom:30px; padding:20px; background:rgba(138,43,226,0.1); border-radius:16px; border:1px solid rgba(138,43,226,0.3);">
+            <p style="color:#b388ff; margin-bottom:10px;">Selected Plan:</p>
+            <h3 id="selectedPlanName" style="color:#e1bee7; font-size:1.5rem;"></h3>
+            <p id="selectedPlanPrice" style="color:#00ff88; font-size:2rem; font-weight:800;"></p>
+            <button onclick="cancelSelection()" style="margin-top:15px; background:none; border:1px solid rgba(138,43,226,0.3); color:#b388ff; padding:8px 20px; border-radius:8px; cursor:pointer;">Cancel</button>
         </div>
 
         <!-- Guarantee -->
         <div class="guarantee-section">
-            <div style="font-size: 2.5rem; margin-bottom: 10px;">🛡️</div>
-            <h3 style="color: #00ff88; margin-bottom: 10px;">100% Satisfaction Guarantee</h3>
-            <p style="color: #b388ff;">Not happy? Cancel anytime. No questions asked.</p>
+            <div style="font-size:2.5rem; margin-bottom:10px;">🛡️</div>
+            <h3 style="color:#00ff88; margin-bottom:10px;">100% Satisfaction Guarantee</h3>
+            <p style="color:#b388ff;">Secure payment powered by Stripe. Cancel anytime.</p>
         </div>
     </div>
 
-    <!-- Payment Modal -->
-    <div id="paymentModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(5, 5, 16, 0.95); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(10px);">
-        <div style="background: linear-gradient(135deg, rgba(30, 15, 50, 0.95), rgba(20, 10, 40, 0.95)); border-radius: 24px; padding: 30px; max-width: 420px; width: 90%; border: 2px solid rgba(138, 43, 226, 0.4); position: relative; max-height: 90vh; overflow-y: auto; box-shadow: 0 0 60px rgba(138, 43, 226, 0.3);">
-            <button onclick="closePaymentModal()" style="position: absolute; top: 12px; right: 15px; background: none; border: none; color: #b388ff; font-size: 1.8rem; cursor: pointer; line-height: 1;">×</button>
+    <!-- KHQR Modal -->
+    <div id="khqrModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(5,5,16,0.95); z-index:9999; align-items:center; justify-content:center;">
+        <div style="background:linear-gradient(135deg,rgba(30,15,50,0.95),rgba(20,10,40,0.95)); border-radius:24px; padding:30px; max-width:420px; width:90%; border:2px solid rgba(0,128,0,0.4); position:relative;">
+            <button onclick="closeKHQRModal()" style="position:absolute; top:12px; right:15px; background:none; border:none; color:#b388ff; font-size:1.8rem; cursor:pointer;">×</button>
             
-            <h2 style="text-align: center; margin-bottom: 20px; color: #e1bee7; font-size: 1.5rem;">
-                <span id="modalPlanName">⭐ Pro Plan</span>
-            </h2>
+            <h2 style="text-align:center; margin-bottom:20px; color:#00ff88; font-size:1.5rem;" id="khqrPlanName">⭐ Pro Plan</h2>
             
-            <div style="text-align: center; margin-bottom: 20px;">
-                <div style="font-size: 2.5rem; font-weight: 800; background: linear-gradient(135deg, #00d4ff, #00ff88); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;" id="modalPrice">$19.99</div>
-                <div style="color: #b388ff;">per month</div>
+            <div style="text-align:center; margin-bottom:20px;">
+                <div style="font-size:2rem; font-weight:800; color:#00ff88;" id="khqrPrice">$19.99</div>
             </div>
             
-            <!-- ACLEDA QR Code -->
-            <div style="background: #fff; border-radius: 16px; padding: 15px; text-align: center; margin-bottom: 20px;">
-                <img id="qrImage" src="/static/acleda_qr.png" alt="ACLEDA KHQR" style="width: 200px; height: auto; border-radius: 8px;">
-                <div style="color: #0d1117; font-weight: 600; margin-top: 10px;">ORM BOUDOM</div>
-                <div style="color: #666; font-size: 0.85rem;">ACLEDA Bank - KHQR</div>
+            <div style="background:#fff; border-radius:16px; padding:15px; text-align:center; margin-bottom:20px;">
+                <img src="/static/acleda_qr.png" alt="KHQR" style="width:200px; height:auto; border-radius:8px;">
+                <div style="color:#0d1117; font-weight:600; margin-top:10px;">ORM BOUDOM</div>
+                <div style="color:#666; font-size:0.85rem;">ACLEDA Bank - KHQR</div>
             </div>
             
-            <!-- Amount -->
-            <div style="background: rgba(255, 215, 0, 0.1); border-radius: 12px; padding: 15px; margin-bottom: 20px; text-align: center; border: 1px solid rgba(255, 215, 0, 0.3);">
-                <span style="color: #ffd700; font-weight: 600;">Amount to Pay: </span>
-                <span style="color: #ffd700; font-weight: 800; font-size: 1.3rem;" id="modalAmount">$19.99</span>
+            <div style="margin-bottom:15px;">
+                <input type="text" id="transactionRef" placeholder="Transaction ID / Reference" style="width:100%; padding:14px; border-radius:10px; border:1px solid rgba(0,128,0,0.3); background:rgba(20,10,40,0.8); color:#e6edf3;">
             </div>
             
-            <!-- Transaction Reference -->
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; color: #b388ff; font-size: 0.85rem; margin-bottom: 8px;">Transaction Reference / Screenshot:</label>
-                <input type="text" id="transactionRef" placeholder="Enter transaction ID or reference" style="width: 100%; padding: 14px; border-radius: 10px; border: 1px solid rgba(138, 43, 226, 0.3); background: rgba(20, 10, 40, 0.8); color: #e6edf3; font-size: 1rem;">
+            <div style="margin-bottom:20px;">
+                <input type="file" id="paymentScreenshot" accept="image/*" style="width:100%; padding:12px; border-radius:10px; border:1px solid rgba(0,128,0,0.3); background:rgba(20,10,40,0.8); color:#e6edf3;">
             </div>
             
-            <div style="margin-bottom: 20px;">
-                <input type="file" id="paymentScreenshot" accept="image/*" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid rgba(138, 43, 226, 0.3); background: rgba(20, 10, 40, 0.8); color: #e6edf3;">
-            </div>
-            
-            <button onclick="submitPayment()" style="width: 100%; padding: 16px; background: linear-gradient(135deg, #00d4ff, #00ff88); border: none; border-radius: 12px; color: #0a0a1a; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: all 0.3s ease;">
+            <button onclick="submitKHQR()" style="width:100%; padding:16px; background:linear-gradient(135deg,#00ff88,#00d4ff); border:none; border-radius:12px; color:#0a0a1a; font-size:1.1rem; font-weight:700; cursor:pointer;">
                 ✅ Submit Payment
             </button>
-            
-            <p style="text-align: center; color: #7c4dff; font-size: 0.8rem; margin-top: 15px;">
-                Verification takes 5-30 minutes
-            </p>
+            <p style="text-align:center; color:#7c4dff; font-size:0.8rem; margin-top:15px;">Manual verification: 5-30 minutes</p>
         </div>
     </div>
 
     <script>
-        // Create floating particles
-        function createParticles() {
-            const container = document.getElementById('particles');
-            const particleCount = 30;
+        // Stripe Configuration
+        const stripePublicKey = '{{ stripe_public_key }}';
+        const stripe = stripePublicKey ? Stripe(stripePublicKey) : null;
+        
+        let selectedPlan = null;
+        let selectedPrice = 0;
+        
+        function selectPlan(plan) {
+            selectedPlan = plan;
+            selectedPrice = plan === 'pro' ? 19.99 : 49.99;
             
-            for (let i = 0; i < particleCount; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.animationDelay = Math.random() * 15 + 's';
-                particle.style.animationDuration = (10 + Math.random() * 10) + 's';
+            // Show payment methods
+            document.getElementById('paymentMethods').style.display = 'grid';
+            document.getElementById('selectedPlanInfo').style.display = 'block';
+            document.getElementById('selectedPlanName').textContent = plan === 'pro' ? '⭐ Pro Plan' : '👑 Premium Plan';
+            document.getElementById('selectedPlanPrice').textContent = '$' + selectedPrice.toFixed(2) + '/month';
+            
+            // Scroll to payment methods
+            document.getElementById('paymentMethods').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        
+        function cancelSelection() {
+            selectedPlan = null;
+            document.getElementById('paymentMethods').style.display = 'none';
+            document.getElementById('selectedPlanInfo').style.display = 'none';
+        }
+        
+        // Stripe Checkout
+        async function payWithStripe() {
+            if (!selectedPlan) {
+                alert('Please select a plan first');
+                return;
+            }
+            
+            if (!stripe) {
+                alert('Stripe is not configured. Please use KHQR payment.');
+                return;
+            }
+            
+            const btn = document.getElementById('stripePayBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading"></span> Processing...';
+            
+            try {
+                const response = await fetch('/api/create-checkout-session', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tier: selectedPlan })
+                });
                 
-                // Random colors for cursed energy
-                const colors = [
-                    'rgba(138, 43, 226, 0.8)',
-                    'rgba(148, 0, 211, 0.8)',
-                    'rgba(186, 85, 211, 0.8)',
-                    'rgba(75, 0, 130, 0.8)',
-                    'rgba(128, 0, 128, 0.8)'
-                ];
-                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
-                particle.style.width = (2 + Math.random() * 4) + 'px';
-                particle.style.height = particle.style.width;
+                const data = await response.json();
                 
-                container.appendChild(particle);
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    btn.disabled = false;
+                    btn.innerHTML = '💳 Pay with Card';
+                    return;
+                }
+                
+                if (data.checkout_url) {
+                    window.location.href = data.checkout_url;
+                }
+            } catch (error) {
+                alert('Network error. Please try again.');
+                btn.disabled = false;
+                btn.innerHTML = '💳 Pay with Card';
             }
         }
         
-        createParticles();
-        
-        // Payment Modal Functions
-        let selectedPlan = '';
-        let selectedPrice = 0;
-        
-        function openPaymentModal(plan, price) {
-            selectedPlan = plan;
-            selectedPrice = price;
-            document.getElementById('modalPlanName').textContent = plan === 'pro' ? '⭐ Pro Plan' : '👑 Premium Plan';
-            document.getElementById('modalPrice').textContent = '$' + price.toFixed(2);
-            document.getElementById('modalAmount').textContent = '$' + price.toFixed(2);
-            document.getElementById('paymentModal').style.display = 'flex';
+        // KHQR Modal
+        function openKHQRModal() {
+            if (!selectedPlan) {
+                alert('Please select a plan first');
+                return;
+            }
+            document.getElementById('khqrPlanName').textContent = selectedPlan === 'pro' ? '⭐ Pro Plan' : '👑 Premium Plan';
+            document.getElementById('khqrPrice').textContent = '$' + selectedPrice.toFixed(2);
+            document.getElementById('khqrModal').style.display = 'flex';
         }
         
-        function closePaymentModal() {
-            document.getElementById('paymentModal').style.display = 'none';
+        function closeKHQRModal() {
+            document.getElementById('khqrModal').style.display = 'none';
         }
         
-        async function submitPayment() {
+        async function submitKHQR() {
             const transactionRef = document.getElementById('transactionRef').value;
             const screenshot = document.getElementById('paymentScreenshot').files[0];
             
@@ -705,7 +383,7 @@
                 
                 if (data.success) {
                     alert('✅ Payment submitted! You will be upgraded within 5-30 minutes.');
-                    closePaymentModal();
+                    closeKHQRModal();
                     window.location.href = '/settings';
                 } else {
                     alert('Error: ' + (data.error || 'Failed'));
@@ -715,8 +393,9 @@
             }
         }
         
-        document.getElementById('paymentModal').addEventListener('click', function(e) {
-            if (e.target === this) closePaymentModal();
+        // Close modal on outside click
+        document.getElementById('khqrModal').addEventListener('click', function(e) {
+            if (e.target === this) closeKHQRModal();
         });
     </script>
 </body>

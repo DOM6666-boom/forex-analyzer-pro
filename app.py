@@ -3338,7 +3338,7 @@ def live_prices():
 def pricing_page():
     """Pricing page for subscription tiers"""
     user = get_current_user()
-    return render_template('pricing.html', user=user, tiers=TIER_LIMITS)
+    return render_template('pricing.html', user=user, tiers=TIER_LIMITS, stripe_public_key=STRIPE_PUBLIC_KEY)
 
 
 @app.route('/history')
