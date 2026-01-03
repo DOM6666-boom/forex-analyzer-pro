@@ -79,7 +79,7 @@ def init_db():
         )
     ''')
 
-    # Subscriptions table
+    # Subscriptions table (current active subscription)
     c.execute('''
         CREATE TABLE IF NOT EXISTS subscriptions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -89,6 +89,26 @@ def init_db():
             stripe_subscription_id TEXT,
             expires_at TEXT,
             created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )
+    ''')
+
+    # Subscription history table (all subscription changes - like big companies)
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS subscription_history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            user_email TEXT,
+            action TEXT,
+            old_tier TEXT,
+            new_tier TEXT,
+            amount REAL,
+            payment_method TEXT,
+            transaction_id TEXT,
+            status TEXT DEFAULT 'completed',
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            expires_at TEXT,
+            notes TEXT,
             FOREIGN KEY (user_id) REFERENCES users (id)
         )
     ''')
@@ -281,15 +301,29 @@ def get_user_history(user_id, limit=20):
     conn.close()
     return history
 
+def log_subscription_change(user_id, user_email, action, old_tier, new_tier, amount=0, payment_method='', transaction_id='', expires_at=None, notes=''):
+    """Log subscription changes to history - like professional companies"""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute('''
+        INSERT INTO subscription_history 
+        (user_id, user_email, action, old_tier, new_tier, amount, payment_method, transaction_id, expires_at, notes)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ''', (user_id, user_email, action, old_tier, new_tier, amount, payment_method, transaction_id, expires_at, notes))
+    conn.commit()
+    conn.close()
+    print(f"[SUBSCRIPTION LOG] {user_email}: {action} - {old_tier} → {new_tier}")
+
 def get_subscription_history(user_id):
-    """Get user's subscription/upgrade history"""
+    """Get user's subscription/upgrade history from subscription_history table"""
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     c = conn.cursor()
-    c.execute('SELECT * FROM subscriptions WHERE user_id = ? ORDER BY created_at DESC', (user_id,))
-    subs = [dict(row) for row in c.fetchall()]
+    # Try new table first
+    c.execute('SELECT * FROM subscription_history WHERE user_id = ? ORDER BY created_at DESC', (user_id,))
+    history = [dict(row) for row in c.fetchall()]
     conn.close()
-    return subs
+    return history
 
 def get_user_full_stats(user_id):
     """Get comprehensive user statistics"""

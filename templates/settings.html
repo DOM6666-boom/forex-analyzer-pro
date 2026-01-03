@@ -835,17 +835,39 @@
             <div class="section-title"><span class="section-icon">💳</span> Subscription History</div>
             {% if subscription_history and subscription_history|length > 0 %}
             {% for sub in subscription_history %}
-            <div class="sub-history-item">
-                <div>
-                    <span class="sub-tier-badge {% if sub.tier == 'premium' %}sub-tier-premium{% else %}sub-tier-pro{% endif %}">
-                        {% if sub.tier == 'premium' %}💎 PREMIUM{% else %}⭐ PRO{% endif %}
-                    </span>
+            <div class="sub-history-item" style="flex-direction: column; gap: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span class="sub-tier-badge {% if sub.new_tier == 'premium' %}sub-tier-premium{% else %}sub-tier-pro{% endif %}">
+                            {% if sub.new_tier == 'premium' %}💎 PREMIUM{% elif sub.new_tier == 'pro' %}⭐ PRO{% else %}{{ sub.new_tier|upper }}{% endif %}
+                        </span>
+                        {% if sub.action %}
+                        <span style="font-size: 0.75rem; color: #00ff88; background: rgba(0,255,136,0.1); padding: 4px 10px; border-radius: 10px;">
+                            {{ sub.action|upper }}
+                        </span>
+                        {% endif %}
+                    </div>
+                    <div class="sub-date" style="text-align: right;">
+                        <div>{{ sub.created_at[:10] if sub.created_at else 'N/A' }}</div>
+                    </div>
                 </div>
-                <div class="sub-date">
-                    <div>Started: {{ sub.created_at[:10] if sub.created_at else 'N/A' }}</div>
-                    {% if sub.expires_at %}
-                    <div style="font-size: 0.8rem; color: #6e7681;">Expires: {{ sub.expires_at[:10] }}</div>
-                    {% endif %}
+                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #8b949e; width: 100%;">
+                    <div>
+                        {% if sub.old_tier and sub.new_tier %}
+                        <span>{{ sub.old_tier }} → {{ sub.new_tier }}</span>
+                        {% endif %}
+                        {% if sub.amount %}
+                        <span style="margin-left: 10px; color: #00ff88;">${{ sub.amount }}</span>
+                        {% endif %}
+                    </div>
+                    <div>
+                        {% if sub.payment_method %}
+                        <span style="color: #00d4ff;">{{ sub.payment_method }}</span>
+                        {% endif %}
+                        {% if sub.expires_at %}
+                        <span style="margin-left: 10px;">Expires: {{ sub.expires_at }}</span>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
             {% endfor %}

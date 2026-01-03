@@ -3528,6 +3528,12 @@ def approve_payment(payment_id):
         target_user_id = payment['user_id']
         target_plan = payment['plan']
         target_email = payment['user_email']
+        target_amount = payment['amount']
+        
+        # Get current tier before upgrade
+        c.execute('SELECT tier FROM users WHERE id = ?', (target_user_id,))
+        current_user = c.fetchone()
+        old_tier = current_user['tier'] if current_user else 'free'
         
         print(f"[APPROVE] Starting approval: user_id={target_user_id}, plan={target_plan}, email={target_email}")
         print(f"[APPROVE] Database path: {DB_PATH}")
@@ -3544,11 +3550,23 @@ def approve_payment(payment_id):
             WHERE id = ?
         ''', (datetime.now().isoformat(), user['email'], payment_id))
         
+        # Calculate expiry date (30 days from now)
+        from datetime import timedelta
+        expires_at = (datetime.now() + timedelta(days=30)).strftime('%B %d, %Y')
+        
         # Add to subscriptions table
         c.execute('''
-            INSERT OR REPLACE INTO subscriptions (user_id, tier, created_at)
-            VALUES (?, ?, ?)
-        ''', (target_user_id, target_plan, datetime.now().isoformat()))
+            INSERT OR REPLACE INTO subscriptions (user_id, tier, created_at, expires_at)
+            VALUES (?, ?, ?, ?)
+        ''', (target_user_id, target_plan, datetime.now().isoformat(), expires_at))
+        
+        # Log to subscription_history (professional tracking)
+        c.execute('''
+            INSERT INTO subscription_history 
+            (user_id, user_email, action, old_tier, new_tier, amount, payment_method, transaction_id, expires_at, notes)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (target_user_id, target_email, 'upgrade', old_tier, target_plan, target_amount, 'KHQR', 
+              payment['transaction_ref'], expires_at, f'Approved by {user["email"]}'))
         
         conn.commit()
         conn.close()
@@ -3623,7 +3641,8 @@ def create_checkout_session():
             customer_email=user['email'],
             metadata={
                 'user_id': user['id'],
-                'tier': tier
+                'tier': tier,
+                'old_tier': user.get('tier', 'free')
             }
         )
         
@@ -3653,9 +3672,33 @@ def payment_success():
             # Retrieve the session to get metadata
             checkout_session = stripe.checkout.Session.retrieve(session_id)
             tier = checkout_session.metadata.get('tier', 'pro')
+            old_tier = checkout_session.metadata.get('old_tier', 'free')
+            amount = checkout_session.amount_total / 100 if checkout_session.amount_total else 0
+            
+            # Calculate expiry (30 days)
+            from datetime import timedelta
+            expires_at = (datetime.now() + timedelta(days=30)).strftime('%B %d, %Y')
             
             # Upgrade user tier
             upgrade_user_tier(user['id'], tier)
+            
+            # Log to subscription_history
+            conn = sqlite3.connect(DB_PATH)
+            c = conn.cursor()
+            c.execute('''
+                INSERT INTO subscription_history 
+                (user_id, user_email, action, old_tier, new_tier, amount, payment_method, transaction_id, expires_at, notes)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (user['id'], user['email'], 'upgrade', old_tier, tier, amount, 'Stripe', 
+                  checkout_session.id, expires_at, 'Stripe payment successful'))
+            
+            # Update subscriptions table with expiry
+            c.execute('''
+                INSERT OR REPLACE INTO subscriptions (user_id, tier, created_at, expires_at)
+                VALUES (?, ?, ?, ?)
+            ''', (user['id'], tier, datetime.now().isoformat(), expires_at))
+            conn.commit()
+            conn.close()
             
             return render_template('payment_success.html', user=user, tier=tier)
         except Exception as e:
