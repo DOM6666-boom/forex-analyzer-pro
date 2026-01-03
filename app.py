@@ -3338,7 +3338,32 @@ def live_prices():
 def pricing_page():
     """Pricing page for subscription tiers"""
     user = get_current_user()
-    return render_template('pricing.html', user=user, tiers=TIER_LIMITS, stripe_public_key=STRIPE_PUBLIC_KEY)
+    subscription_expiry = None
+    
+    if user and user.get('tier') in ['pro', 'premium']:
+        # Get subscription expiry from database
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        c = conn.cursor()
+        c.execute('SELECT expires_at, created_at FROM subscriptions WHERE user_id = ? ORDER BY created_at DESC LIMIT 1', (user['id'],))
+        sub = c.fetchone()
+        conn.close()
+        
+        if sub and sub['expires_at']:
+            subscription_expiry = sub['expires_at']
+        elif sub and sub['created_at']:
+            # If no expiry set, calculate 30 days from created_at
+            from datetime import datetime, timedelta
+            try:
+                created = datetime.fromisoformat(sub['created_at'].replace('Z', '+00:00'))
+                expiry = created + timedelta(days=30)
+                subscription_expiry = expiry.strftime('%B %d, %Y')
+            except:
+                subscription_expiry = 'Active Subscription'
+        else:
+            subscription_expiry = 'Active Subscription'
+    
+    return render_template('pricing.html', user=user, tiers=TIER_LIMITS, stripe_public_key=STRIPE_PUBLIC_KEY, subscription_expiry=subscription_expiry)
 
 
 @app.route('/history')
