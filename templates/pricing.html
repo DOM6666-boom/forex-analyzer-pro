@@ -231,8 +231,15 @@
                     body: JSON.stringify({ tier: selectedPlan })
                 });
                 const data = await response.json();
-                if (data.error) { alert('Error: ' + data.error); btn.disabled = false; btn.innerHTML = '💳 Pay with Card'; return; }
-                if (data.checkout_url) { window.location.href = data.checkout_url; }
+                if (data.error) { 
+                    alert('Error: ' + data.error); 
+                    btn.disabled = false; 
+                    btn.innerHTML = '💳 Pay with Card'; 
+                    return; 
+                }
+                if (data.checkout_url) { 
+                    window.location.href = data.checkout_url; 
+                }
             } catch (error) {
                 alert('Network error. Please try again.');
                 btn.disabled = false;
@@ -247,12 +254,17 @@
             document.getElementById('khqrModal').style.display = 'flex';
         }
         
-        function closeKHQRModal() { document.getElementById('khqrModal').style.display = 'none'; }
+        function closeKHQRModal() { 
+            document.getElementById('khqrModal').style.display = 'none'; 
+        }
         
         async function submitKHQR() {
             const transactionRef = document.getElementById('transactionRef').value;
             const screenshot = document.getElementById('paymentScreenshot').files[0];
-            if (!transactionRef && !screenshot) { alert('Please enter transaction reference or upload screenshot'); return; }
+            if (!transactionRef && !screenshot) { 
+                alert('Please enter transaction reference or upload screenshot'); 
+                return; 
+            }
             
             const formData = new FormData();
             formData.append('plan', selectedPlan);
@@ -263,12 +275,21 @@
             try {
                 const response = await fetch('/api/submit-payment', { method: 'POST', body: formData });
                 const data = await response.json();
-                if (data.success) { alert('✅ Payment submitted! You will be upgraded within 5-30 minutes.'); closeKHQRModal(); window.location.href = '/settings'; }
-                else { alert('Error: ' + (data.error || 'Failed')); }
-            } catch (error) { alert('Network error. Please try again.'); }
+                if (data.success) { 
+                    alert('✅ Payment submitted! You will be upgraded within 5-30 minutes.'); 
+                    closeKHQRModal(); 
+                    window.location.href = '/settings'; 
+                } else { 
+                    alert('Error: ' + (data.error || 'Failed')); 
+                }
+            } catch (error) { 
+                alert('Network error. Please try again.'); 
+            }
         }
         
-        document.getElementById('khqrModal').addEventListener('click', function(e) { if (e.target === this) closeKHQRModal(); });
+        document.getElementById('khqrModal').addEventListener('click', function(e) { 
+            if (e.target === this) closeKHQRModal(); 
+        });
     </script>
 </body>
 </html>
