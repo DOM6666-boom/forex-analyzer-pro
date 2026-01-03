@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Pro Forex Analyzer - Institutional Grade AI</title>
     
     <!-- Premium Favicon -->
@@ -2927,15 +2930,23 @@
             alert(`Selected ${symbol}! Now upload a chart screenshot to analyze.`);
         }
         
-        // User tier from server - Use variables passed from Flask
+        // User tier from server
         const userTier = '{{ user.tier if user else "free" }}';
         const userEmail = '{{ user.email if user else "" }}';
-        // Use server-side calculated values (more reliable)
-        const isOwner = {{ 'true' if is_owner else 'false' }};
-        const isPaid = {{ 'true' if is_paid else 'false' }};
+        
+        // Check owner and paid status directly in JavaScript (more reliable)
+        const isOwner = userEmail.toLowerCase().includes('vanndom300');
+        const isPaid = (userTier === 'pro' || userTier === 'premium');
         const canUseFullMode = isOwner || isPaid;
         
-        console.log('[ANALYSIS DEPTH] userTier:', userTier, 'userEmail:', userEmail, 'isOwner:', isOwner, 'isPaid:', isPaid, 'canUseFullMode:', canUseFullMode);
+        // Debug log
+        console.log('[ANALYSIS DEPTH] ===== DEBUG =====');
+        console.log('[ANALYSIS DEPTH] userEmail:', userEmail);
+        console.log('[ANALYSIS DEPTH] userTier:', userTier);
+        console.log('[ANALYSIS DEPTH] isOwner:', isOwner);
+        console.log('[ANALYSIS DEPTH] isPaid:', isPaid);
+        console.log('[ANALYSIS DEPTH] canUseFullMode:', canUseFullMode);
+        console.log('[ANALYSIS DEPTH] ==================');
         
         function setAnalysisDepth(depth) {
             console.log('[ANALYSIS DEPTH] setAnalysisDepth called with:', depth);
