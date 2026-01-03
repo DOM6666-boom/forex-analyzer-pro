@@ -2980,7 +2980,10 @@
         
         // ========== QUICK ANALYSIS ==========
         function quickAnalysis(symbol) {
-            symbolSelect.value = symbol;
+            // Only works for non-owner users with select dropdown
+            if (symbolSelect && symbolSelect.tagName === 'SELECT') {
+                symbolSelect.value = symbol;
+            }
             // Highlight the upload area
             uploadArea.style.borderColor = '#00ff88';
             uploadArea.style.background = 'rgba(0,255,136,0.1)';
@@ -2990,7 +2993,10 @@
             }, 1000);
             // Scroll to upload area
             uploadArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            alert(`Selected ${symbol}! Now upload a chart screenshot to analyze.`);
+            // Only show alert for non-owner
+            if (symbolSelect && symbolSelect.tagName === 'SELECT') {
+                alert(`Selected ${symbol}! Now upload a chart screenshot to analyze.`);
+            }
         }
         
         // User tier from server
@@ -3157,14 +3163,20 @@
                 mtfUpload.style.display = 'none';
                 analyzeMtfBtn.style.display = 'none';
                 if (selectedFile) analyzeBtn.style.display = 'block';
-                intervalSelect.parentElement.style.display = 'block';
+                // Only show interval select for non-owner users
+                if (intervalSelect && intervalSelect.parentElement) {
+                    intervalSelect.parentElement.style.display = 'block';
+                }
             } else {
                 singleModeBtn.classList.remove('active');
                 mtfModeBtn.classList.add('active');
                 singleUpload.style.display = 'none';
                 mtfUpload.style.display = 'block';
                 analyzeBtn.style.display = 'none';
-                intervalSelect.parentElement.style.display = 'none';
+                // Only hide interval select for non-owner users
+                if (intervalSelect && intervalSelect.parentElement) {
+                    intervalSelect.parentElement.style.display = 'none';
+                }
                 updateMtfStatus();
             }
         }
@@ -4284,8 +4296,18 @@
         
         function selectWatchlistSymbol(symbol) {
             const select = document.getElementById('symbolSelect');
-            const options = select.options;
             
+            // Only works for non-owner users with select dropdown
+            if (!select || select.tagName !== 'SELECT') {
+                // Owner mode - just scroll to upload area
+                const uploadArea = document.getElementById('uploadArea');
+                if (uploadArea) {
+                    uploadArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                return;
+            }
+            
+            const options = select.options;
             for (let i = 0; i < options.length; i++) {
                 if (options[i].value === symbol) {
                     select.selectedIndex = i;
