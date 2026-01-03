@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pricing - Pro Forex Analyzer</title>
+    <meta name="description" content="Professional AI-powered forex analysis with institutional-grade signals. Choose your plan.">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://js.stripe.com/v3/"></script>
     <style>
@@ -26,7 +27,6 @@
         .page-title { font-size:3rem; font-weight:800; background:linear-gradient(135deg,#e1bee7,#ba68c8,#9c27b0); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
         .page-subtitle { color:#b388ff; font-size:1.1rem; margin-top:10px; }
         
-        /* Current subscription banner */
         .current-plan-banner { background: linear-gradient(135deg, rgba(0,255,136,0.1), rgba(0,212,255,0.1)); border: 1px solid rgba(0,255,136,0.3); border-radius: 16px; padding: 20px; margin-bottom: 30px; text-align: center; }
         .current-plan-banner h3 { color: #00ff88; margin-bottom: 8px; }
         .current-plan-banner .plan-name { font-size: 1.5rem; font-weight: 800; background: linear-gradient(135deg, #ffd700, #ff8c00); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
@@ -73,9 +73,21 @@
         .payment-card p { color:#b388ff; font-size:0.9rem; margin-bottom:15px; }
         .payment-icons { font-size:2rem; margin-bottom:15px; }
         
-        .guarantee-section { text-align:center; padding:30px; background:rgba(0,255,136,0.05); border-radius:20px; border:1px solid rgba(0,255,136,0.2); }
+        .guarantee-section { text-align:center; padding:30px; background:rgba(0,255,136,0.05); border-radius:20px; border:1px solid rgba(0,255,136,0.2); margin-bottom:40px; }
         .loading { display:inline-block; width:20px; height:20px; border:2px solid transparent; border-top-color:#0a0a1a; border-radius:50%; animation:spin 1s linear infinite; }
         @keyframes spin { to { transform:rotate(360deg); } }
+        
+        /* Professional Footer */
+        .footer { background:rgba(10,5,20,0.9); border-top:1px solid rgba(138,43,226,0.2); padding:40px 20px 20px; margin-top:50px; }
+        .footer-content { max-width:1200px; margin:0 auto; display:grid; grid-template-columns:repeat(3,1fr); gap:40px; }
+        @media(max-width:700px) { .footer-content { grid-template-columns:1fr; text-align:center; } }
+        .footer-section h4 { color:#e1bee7; margin-bottom:15px; font-size:1rem; }
+        .footer-section p, .footer-section a { color:#8b949e; font-size:0.85rem; line-height:1.8; text-decoration:none; display:block; }
+        .footer-section a:hover { color:#00d4ff; }
+        .footer-bottom { max-width:1200px; margin:30px auto 0; padding-top:20px; border-top:1px solid rgba(138,43,226,0.1); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px; }
+        .footer-bottom p { color:#6e7681; font-size:0.8rem; }
+        .security-badges { display:flex; gap:15px; align-items:center; }
+        .security-badge { background:rgba(0,255,136,0.1); border:1px solid rgba(0,255,136,0.3); padding:6px 12px; border-radius:8px; font-size:0.75rem; color:#00ff88; }
     </style>
 </head>
 <body>
@@ -98,14 +110,11 @@
             <div class="plan-name {% if user.tier == 'pro' %}pro{% endif %}">
                 {% if user.tier == 'premium' %}👑 Premium Plan{% else %}⭐ Pro Plan{% endif %}
             </div>
-            <div class="expiry">
-                📅 Valid until: {{ subscription_expiry if subscription_expiry else 'Lifetime Access' }}
-            </div>
+            <div class="expiry">📅 Valid until: {{ subscription_expiry if subscription_expiry else 'Active Subscription' }}</div>
         </div>
         {% endif %}
         
         <div class="pricing-grid">
-            <!-- FREE PLAN -->
             <div class="pricing-card">
                 <div class="tier-name">Free</div>
                 <div class="tier-price free">$0<span>/month</span></div>
@@ -116,16 +125,11 @@
                     <li><span class="x">✗</span> Full 744 concepts</li>
                     <li><span class="x">✗</span> Multi-timeframe analysis</li>
                 </ul>
-                {% if not user %}
-                <a href="/login" class="tier-btn free-btn">Get Started Free</a>
-                {% elif user.tier == 'free' %}
-                <button class="tier-btn current">✓ Current Plan</button>
-                {% else %}
-                <button class="tier-btn included">✓ Included</button>
-                {% endif %}
+                {% if not user %}<a href="/login" class="tier-btn free-btn">Get Started Free</a>
+                {% elif user.tier == 'free' %}<button class="tier-btn current">✓ Current Plan</button>
+                {% else %}<button class="tier-btn included">✓ Included</button>{% endif %}
             </div>
             
-            <!-- PRO PLAN -->
             <div class="pricing-card popular">
                 <div class="popular-badge">⭐ Most Popular</div>
                 <div class="tier-name">Pro</div>
@@ -137,18 +141,12 @@
                     <li><span class="check">✓</span> Multi-timeframe analysis</li>
                     <li><span class="x">✗</span> Priority AI processing</li>
                 </ul>
-                {% if not user %}
-                <a href="/login" class="tier-btn upgrade">Login to Upgrade</a>
-                {% elif user.tier == 'premium' %}
-                <button class="tier-btn included">✓ Included in Premium</button>
-                {% elif user.tier == 'pro' %}
-                <button class="tier-btn current">✓ Current Plan</button>
-                {% else %}
-                <button class="tier-btn upgrade" onclick="selectPlan('pro')">🚀 Upgrade to Pro</button>
-                {% endif %}
+                {% if not user %}<a href="/login" class="tier-btn upgrade">Login to Upgrade</a>
+                {% elif user.tier == 'premium' %}<button class="tier-btn included">✓ Included in Premium</button>
+                {% elif user.tier == 'pro' %}<button class="tier-btn current">✓ Current Plan</button>
+                {% else %}<button class="tier-btn upgrade" onclick="selectPlan('pro')">🚀 Upgrade to Pro</button>{% endif %}
             </div>
             
-            <!-- PREMIUM PLAN -->
             <div class="pricing-card premium-card">
                 <div class="tier-name premium">👑 Premium</div>
                 <div class="tier-price premium">$49.99<span>/month</span></div>
@@ -159,13 +157,9 @@
                     <li><span class="check">✓</span> Multi-timeframe analysis</li>
                     <li><span class="check">✓</span> Priority AI processing</li>
                 </ul>
-                {% if not user %}
-                <a href="/login" class="tier-btn upgrade premium-btn">Login to Upgrade</a>
-                {% elif user.tier == 'premium' %}
-                <button class="tier-btn current">✓ Current Plan</button>
-                {% else %}
-                <button class="tier-btn upgrade premium-btn" onclick="selectPlan('premium')">💎 Upgrade to Premium</button>
-                {% endif %}
+                {% if not user %}<a href="/login" class="tier-btn upgrade premium-btn">Login to Upgrade</a>
+                {% elif user.tier == 'premium' %}<button class="tier-btn current">✓ Current Plan</button>
+                {% else %}<button class="tier-btn upgrade premium-btn" onclick="selectPlan('premium')">💎 Upgrade to Premium</button>{% endif %}
             </div>
         </div>
 
@@ -194,28 +188,51 @@
         <div class="guarantee-section">
             <div style="font-size:2.5rem; margin-bottom:10px;">🛡️</div>
             <h3 style="color:#00ff88; margin-bottom:10px;">100% Satisfaction Guarantee</h3>
-            <p style="color:#b388ff;">Secure payment powered by Stripe. Cancel anytime.</p>
+            <p style="color:#b388ff;">Secure payment powered by Stripe. Cancel anytime. 30-day money-back guarantee.</p>
         </div>
     </div>
+    
+    <!-- Professional Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>🔬 Pro Forex Analyzer</h4>
+                <p>Institutional-grade AI trading analysis with 744 technical concepts. Trusted by traders worldwide.</p>
+            </div>
+            <div class="footer-section">
+                <h4>📋 Legal</h4>
+                <a href="#">Terms of Service</a>
+                <a href="#">Privacy Policy</a>
+                <a href="#">Refund Policy</a>
+            </div>
+            <div class="footer-section">
+                <h4>📧 Support</h4>
+                <p>Email: support@forexanalyzer.pro</p>
+                <p>Response time: 24-48 hours</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2026 Pro Forex Analyzer. All rights reserved.</p>
+            <div class="security-badges">
+                <span class="security-badge">🔒 SSL Secured</span>
+                <span class="security-badge">💳 PCI Compliant</span>
+                <span class="security-badge">🛡️ 256-bit Encryption</span>
+            </div>
+        </div>
+    </footer>
 
     <div id="khqrModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(5,5,16,0.95); z-index:9999; align-items:center; justify-content:center;">
         <div style="background:linear-gradient(135deg,rgba(30,15,50,0.95),rgba(20,10,40,0.95)); border-radius:24px; padding:30px; max-width:420px; width:90%; border:2px solid rgba(0,128,0,0.4); position:relative;">
             <button onclick="closeKHQRModal()" style="position:absolute; top:12px; right:15px; background:none; border:none; color:#b388ff; font-size:1.8rem; cursor:pointer;">×</button>
             <h2 style="text-align:center; margin-bottom:20px; color:#00ff88; font-size:1.5rem;" id="khqrPlanName">⭐ Pro Plan</h2>
-            <div style="text-align:center; margin-bottom:20px;">
-                <div style="font-size:2rem; font-weight:800; color:#00ff88;" id="khqrPrice">$19.99</div>
-            </div>
+            <div style="text-align:center; margin-bottom:20px;"><div style="font-size:2rem; font-weight:800; color:#00ff88;" id="khqrPrice">$19.99</div></div>
             <div style="background:#fff; border-radius:16px; padding:15px; text-align:center; margin-bottom:20px;">
                 <img src="/static/acleda_qr.png" alt="KHQR" style="width:200px; height:auto; border-radius:8px;">
                 <div style="color:#0d1117; font-weight:600; margin-top:10px;">ORM BOUDOM</div>
                 <div style="color:#666; font-size:0.85rem;">ACLEDA Bank - KHQR</div>
             </div>
-            <div style="margin-bottom:15px;">
-                <input type="text" id="transactionRef" placeholder="Transaction ID / Reference" style="width:100%; padding:14px; border-radius:10px; border:1px solid rgba(0,128,0,0.3); background:rgba(20,10,40,0.8); color:#e6edf3;">
-            </div>
-            <div style="margin-bottom:20px;">
-                <input type="file" id="paymentScreenshot" accept="image/*" style="width:100%; padding:12px; border-radius:10px; border:1px solid rgba(0,128,0,0.3); background:rgba(20,10,40,0.8); color:#e6edf3;">
-            </div>
+            <div style="margin-bottom:15px;"><input type="text" id="transactionRef" placeholder="Transaction ID / Reference" style="width:100%; padding:14px; border-radius:10px; border:1px solid rgba(0,128,0,0.3); background:rgba(20,10,40,0.8); color:#e6edf3;"></div>
+            <div style="margin-bottom:20px;"><input type="file" id="paymentScreenshot" accept="image/*" style="width:100%; padding:12px; border-radius:10px; border:1px solid rgba(0,128,0,0.3); background:rgba(20,10,40,0.8); color:#e6edf3;"></div>
             <button onclick="submitKHQR()" style="width:100%; padding:16px; background:linear-gradient(135deg,#00ff88,#00d4ff); border:none; border-radius:12px; color:#0a0a1a; font-size:1.1rem; font-weight:700; cursor:pointer;">✅ Submit Payment</button>
             <p style="text-align:center; color:#7c4dff; font-size:0.8rem; margin-top:15px;">Manual verification: 5-30 minutes</p>
         </div>
@@ -246,11 +263,9 @@
         async function payWithStripe() {
             if (!selectedPlan) { alert('Please select a plan first'); return; }
             if (!stripe) { alert('Stripe is not configured. Please use KHQR payment.'); return; }
-            
             const btn = document.getElementById('stripePayBtn');
             btn.disabled = true;
             btn.innerHTML = '<span class="loading"></span> Processing...';
-            
             try {
                 const response = await fetch('/api/create-checkout-session', {
                     method: 'POST',
@@ -258,15 +273,8 @@
                     body: JSON.stringify({ tier: selectedPlan })
                 });
                 const data = await response.json();
-                if (data.error) { 
-                    alert('Error: ' + data.error); 
-                    btn.disabled = false; 
-                    btn.innerHTML = '💳 Pay with Card'; 
-                    return; 
-                }
-                if (data.checkout_url) { 
-                    window.location.href = data.checkout_url; 
-                }
+                if (data.error) { alert('Error: ' + data.error); btn.disabled = false; btn.innerHTML = '💳 Pay with Card'; return; }
+                if (data.checkout_url) { window.location.href = data.checkout_url; }
             } catch (error) {
                 alert('Network error. Please try again.');
                 btn.disabled = false;
@@ -281,42 +289,26 @@
             document.getElementById('khqrModal').style.display = 'flex';
         }
         
-        function closeKHQRModal() { 
-            document.getElementById('khqrModal').style.display = 'none'; 
-        }
+        function closeKHQRModal() { document.getElementById('khqrModal').style.display = 'none'; }
         
         async function submitKHQR() {
             const transactionRef = document.getElementById('transactionRef').value;
             const screenshot = document.getElementById('paymentScreenshot').files[0];
-            if (!transactionRef && !screenshot) { 
-                alert('Please enter transaction reference or upload screenshot'); 
-                return; 
-            }
-            
+            if (!transactionRef && !screenshot) { alert('Please enter transaction reference or upload screenshot'); return; }
             const formData = new FormData();
             formData.append('plan', selectedPlan);
             formData.append('amount', selectedPrice);
             formData.append('transaction_ref', transactionRef);
             if (screenshot) formData.append('screenshot', screenshot);
-            
             try {
                 const response = await fetch('/api/submit-payment', { method: 'POST', body: formData });
                 const data = await response.json();
-                if (data.success) { 
-                    alert('✅ Payment submitted! You will be upgraded within 5-30 minutes.'); 
-                    closeKHQRModal(); 
-                    window.location.href = '/settings'; 
-                } else { 
-                    alert('Error: ' + (data.error || 'Failed')); 
-                }
-            } catch (error) { 
-                alert('Network error. Please try again.'); 
-            }
+                if (data.success) { alert('✅ Payment submitted! You will be upgraded within 5-30 minutes.'); closeKHQRModal(); window.location.href = '/settings'; }
+                else { alert('Error: ' + (data.error || 'Failed')); }
+            } catch (error) { alert('Network error. Please try again.'); }
         }
         
-        document.getElementById('khqrModal').addEventListener('click', function(e) { 
-            if (e.target === this) closeKHQRModal(); 
-        });
+        document.getElementById('khqrModal').addEventListener('click', function(e) { if (e.target === this) closeKHQRModal(); });
     </script>
 </body>
 </html>

@@ -148,12 +148,22 @@ app.permanent_session_lifetime = timedelta(days=30)
 
 print(f"[SESSION] Production mode: {IS_PRODUCTION}, Secure cookies: {IS_PRODUCTION}, Session lifetime: 30 days")
 
-# Security Headers
+# Security Headers - Enterprise Grade
 @app.after_request
 def add_security_headers(response):
+    # Prevent MIME type sniffing
     response.headers['X-Content-Type-Options'] = 'nosniff'
+    # Prevent clickjacking
     response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    # XSS Protection
     response.headers['X-XSS-Protection'] = '1; mode=block'
+    # Referrer Policy
+    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+    # Permissions Policy (disable unnecessary features)
+    response.headers['Permissions-Policy'] = 'geolocation=(), microphone=(), camera=()'
+    # Content Security Policy (basic)
+    if IS_PRODUCTION:
+        response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
     # Prevent caching of HTML pages to ensure latest version
     if response.content_type and 'text/html' in response.content_type:
         response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
