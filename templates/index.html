@@ -2485,6 +2485,9 @@
             const symbolSelect = document.getElementById('symbolSelect');
             const intervalSelect = document.getElementById('intervalSelect');
             
+            // Check if owner auto-detect mode (hidden inputs instead of selects)
+            const isOwnerAutoDetect = symbolSelect && symbolSelect.tagName === 'INPUT' && symbolSelect.value === 'AUTO';
+            
             analyzeBtn.disabled = true;
             analyzeBtn.textContent = '⏳ Analyzing...';
             loading.classList.add('active');
@@ -2495,8 +2498,8 @@
             
             const formData = new FormData();
             formData.append('image', selectedFile);
-            formData.append('symbol', getSelectedSymbol());
-            formData.append('interval', intervalSelect.value);
+            formData.append('symbol', isOwnerAutoDetect ? 'AUTO' : getSelectedSymbol());
+            formData.append('interval', isOwnerAutoDetect ? 'AUTO' : (intervalSelect ? intervalSelect.value : '1h'));
             formData.append('light_mode', lightMode.toString());
             
             try {
@@ -2545,10 +2548,20 @@
                     signalCard.innerHTML = '';
                 } else {
                     const signal = parseSignal(data.analysis);
-                    const symbol = getSelectedSymbol();
-                    const interval = intervalSelect.options[intervalSelect.selectedIndex].text;
                     
-                    let cardsHtml = createSignalCard(signal, symbol, interval);
+                    // Handle symbol and interval for both owner auto-detect and regular users
+                    let displaySymbol, displayInterval;
+                    if (data.auto_detect && data.detected_symbol) {
+                        displaySymbol = data.detected_symbol;
+                        displayInterval = data.detected_timeframe || 'H1';
+                    } else {
+                        displaySymbol = getSelectedSymbol();
+                        displayInterval = (intervalSelect && intervalSelect.options) 
+                            ? intervalSelect.options[intervalSelect.selectedIndex].text 
+                            : (intervalSelect ? intervalSelect.value : 'H1');
+                    }
+                    
+                    let cardsHtml = createSignalCard(signal, displaySymbol, displayInterval);
                     
                     if (data.validation) {
                         cardsHtml += createValidationCard(data.validation);
@@ -2563,17 +2576,17 @@
                     // Handle auto-detect mode response (Owner only)
                     if (data.auto_detect && data.detected_symbol && data.detected_timeframe) {
                         const autoDetectResult = document.getElementById('autoDetectResult');
-                        const detectedSymbol = document.getElementById('detectedSymbol');
-                        const detectedTimeframe = document.getElementById('detectedTimeframe');
-                        if (autoDetectResult && detectedSymbol && detectedTimeframe) {
-                            detectedSymbol.textContent = data.detected_symbol;
-                            detectedTimeframe.textContent = data.detected_timeframe;
+                        const detectedSymbolEl = document.getElementById('detectedSymbol');
+                        const detectedTimeframeEl = document.getElementById('detectedTimeframe');
+                        if (autoDetectResult && detectedSymbolEl && detectedTimeframeEl) {
+                            detectedSymbolEl.textContent = data.detected_symbol;
+                            detectedTimeframeEl.textContent = data.detected_timeframe;
                             autoDetectResult.style.display = 'block';
                         }
                         // Use detected values for history
                         saveToHistory(signal, data.detected_symbol, data.detected_timeframe, data.analysis);
                     } else {
-                        saveToHistory(signal, symbol, interval, data.analysis);
+                        saveToHistory(signal, displaySymbol, displayInterval, data.analysis);
                     }
                     
                     loadUserInfo(); // Refresh user info after analysis
@@ -3104,25 +3117,35 @@
             const symbolSelect = document.getElementById('symbolSelect');
             const customInput = document.getElementById('customSymbolInput');
             
-            if (symbolSelect.value === 'CUSTOM') {
+            if (symbolSelect && symbolSelect.tagName === 'SELECT' && symbolSelect.value === 'CUSTOM') {
                 customInput.style.display = 'block';
                 customInput.focus();
-            } else {
+            } else if (customInput) {
                 customInput.style.display = 'none';
                 customInput.value = '';
             }
         }
         
-        // Get the actual symbol value (handles custom input)
+        // Get the actual symbol value (handles custom input and owner auto-detect)
         function getSelectedSymbol() {
             const symbolSelect = document.getElementById('symbolSelect');
             const customInput = document.getElementById('customSymbolInput');
             
-            if (symbolSelect.value === 'CUSTOM') {
-                const customValue = customInput.value.trim().toUpperCase();
-                return customValue || 'CUSTOM';
+            // Owner auto-detect mode - return AUTO
+            if (symbolSelect && symbolSelect.tagName === 'INPUT' && symbolSelect.value === 'AUTO') {
+                return 'AUTO';
             }
-            return symbolSelect.value;
+            
+            // Regular mode with select dropdown
+            if (symbolSelect && symbolSelect.tagName === 'SELECT') {
+                if (symbolSelect.value === 'CUSTOM' && customInput) {
+                    const customValue = customInput.value.trim().toUpperCase();
+                    return customValue || 'CUSTOM';
+                }
+                return symbolSelect.value;
+            }
+            
+            return symbolSelect ? symbolSelect.value : 'XAU/USD';
         }
         
         function setMode(mode) {
@@ -3912,6 +3935,9 @@
             
             if (!selectedFile) return;
             
+            // Check if owner auto-detect mode
+            const isOwnerAutoDetect = symbolSelect && symbolSelect.tagName === 'INPUT' && symbolSelect.value === 'AUTO';
+            
             analyzeBtn.disabled = true;
             loading.classList.add('active');
             resultPanel.style.display = 'none';
@@ -3919,8 +3945,8 @@
             
             const formData = new FormData();
             formData.append('image', selectedFile);
-            formData.append('symbol', getSelectedSymbol());
-            formData.append('interval', intervalSelect.value);
+            formData.append('symbol', isOwnerAutoDetect ? 'AUTO' : getSelectedSymbol());
+            formData.append('interval', isOwnerAutoDetect ? 'AUTO' : (intervalSelect ? intervalSelect.value : '1h'));
             formData.append('light_mode', lightMode.toString());
             
             try {
@@ -3957,11 +3983,21 @@
                     signalCard.innerHTML = '';
                 } else {
                     const signal = parseSignal(data.analysis);
-                    const symbol = getSelectedSymbol();
-                    const interval = intervalSelect.options[intervalSelect.selectedIndex].text;
+                    
+                    // Handle symbol and interval for both owner auto-detect and regular users
+                    let displaySymbol, displayInterval;
+                    if (data.auto_detect && data.detected_symbol) {
+                        displaySymbol = data.detected_symbol;
+                        displayInterval = data.detected_timeframe || 'H1';
+                    } else {
+                        displaySymbol = getSelectedSymbol();
+                        displayInterval = (intervalSelect && intervalSelect.options) 
+                            ? intervalSelect.options[intervalSelect.selectedIndex].text 
+                            : (intervalSelect ? intervalSelect.value : 'H1');
+                    }
                     
                     // Create signal card + validation + confluence cards
-                    let cardsHtml = createSignalCard(signal, symbol, interval);
+                    let cardsHtml = createSignalCard(signal, displaySymbol, displayInterval);
                     
                     // Add SL Warning if auto-corrected
                     if (data.annotations && data.annotations.sl_warning) {
@@ -3984,7 +4020,7 @@
                     }
                     
                     signalCard.innerHTML = cardsHtml;
-                    saveToHistory(signal, symbol, interval, data.analysis);
+                    saveToHistory(signal, displaySymbol, displayInterval, data.analysis);
                     
                     // Draw annotated chart if annotations available
                     if (data.annotations && data.image_base64) {
