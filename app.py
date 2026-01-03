@@ -2427,15 +2427,30 @@ def login_page():
 @app.route('/auth/register', methods=['POST'])
 def register():
     """Register new user with email/password"""
+    import re
+    
     email = request.form.get('email', '').lower().strip()
     password = request.form.get('password', '')
-    name = request.form.get('name', '')
+    name = request.form.get('name', '').strip()
     
+    # ========== INPUT VALIDATION ==========
     if not email or not password:
         return redirect('/login?error=Email and password required')
     
+    # Validate email format
+    email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    if not re.match(email_pattern, email):
+        return redirect('/login?error=Invalid email format')
+    
+    # Validate password strength
     if len(password) < 8:
         return redirect('/login?error=Password must be at least 8 characters')
+    
+    if not re.search(r'[A-Za-z]', password) or not re.search(r'[0-9]', password):
+        return redirect('/login?error=Password must contain letters and numbers')
+    
+    # Sanitize name (prevent XSS)
+    name = re.sub(r'[<>"\']', '', name)[:100]  # Remove dangerous chars, max 100 chars
     
     # Check if user exists
     existing = get_user_by_email(email)
@@ -2447,6 +2462,7 @@ def register():
     if user_id:
         session.permanent = True  # Use PERMANENT_SESSION_LIFETIME (24 hours)
         session['user_id'] = user_id
+        app.logger.info(f"[REGISTER] New user registered: {email}")
         return redirect('/')
     
     return redirect('/login?error=Registration failed. Please try again.')
@@ -2767,12 +2783,46 @@ def analyze_visual():
         return jsonify({'error': 'No image uploaded'}), 400
     
     file = request.files['image']
+    
+    # ========== INPUT VALIDATION & SANITIZATION ==========
+    # Validate symbol (prevent injection)
     symbol = request.form.get('symbol', 'XAU/USD')
+    allowed_symbols = ['XAU/USD', 'XAG/USD', 'EUR/USD', 'GBP/USD', 'USD/JPY', 'USD/CHF', 
+                       'AUD/USD', 'NZD/USD', 'USD/CAD', 'EUR/GBP', 'EUR/JPY', 'GBP/JPY',
+                       'BTC/USD', 'ETH/USD', 'US30', 'NAS100', 'SPX500']
+    # Allow custom symbols but sanitize them
+    if symbol not in allowed_symbols:
+        # Sanitize custom symbol: only allow alphanumeric, /, and -
+        import re
+        symbol = re.sub(r'[^A-Za-z0-9/\-]', '', symbol)[:20]  # Max 20 chars
+        if not symbol:
+            symbol = 'XAU/USD'
+    
+    # Validate interval
     interval = request.form.get('interval', '1h')
+    allowed_intervals = ['1min', '5min', '15min', '30min', '1h', '4h', '1day', '1week', '1month',
+                         'M1', 'M5', 'M15', 'M30', 'H1', 'H4', 'D1', 'W1', 'MN']
+    if interval not in allowed_intervals:
+        interval = '1h'
+    
     light_mode = request.form.get('light_mode', 'false').lower() == 'true'
     
+    # Validate file
     if file.filename == '':
         return jsonify({'error': 'No image selected'}), 400
+    
+    # Validate file type
+    allowed_extensions = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+    file_ext = file.filename.rsplit('.', 1)[-1].lower() if '.' in file.filename else ''
+    if file_ext not in allowed_extensions:
+        return jsonify({'error': 'Invalid file type. Allowed: PNG, JPG, JPEG, GIF, WEBP'}), 400
+    
+    # Validate file size (max 10MB)
+    file.seek(0, 2)  # Seek to end
+    file_size = file.tell()
+    file.seek(0)  # Reset to beginning
+    if file_size > 10 * 1024 * 1024:  # 10MB
+        return jsonify({'error': 'File too large. Maximum size: 10MB'}), 400
     
     try:
         # Increment analysis count
