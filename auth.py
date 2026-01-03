@@ -93,6 +93,24 @@ def init_db():
         )
     ''')
 
+    # Payment requests table (for manual KHQR payments)
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS payment_requests (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            user_email TEXT,
+            plan TEXT,
+            amount REAL,
+            transaction_ref TEXT,
+            screenshot_path TEXT,
+            status TEXT DEFAULT 'pending',
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            approved_at TEXT,
+            approved_by TEXT,
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )
+    ''')
+
     conn.commit()
     conn.close()
     print("✅ Database initialized")
