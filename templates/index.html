@@ -2267,8 +2267,8 @@
                 <div class="form-group">
                     <label>Analysis Depth</label>
                     <div class="mode-toggle">
-                        <button type="button" class="mode-btn{% if not is_owner and not is_paid %} active{% endif %}" id="lightModeBtn" onclick="setAnalysisDepth('light')">⚡ Light (Fast)</button>
-                        <button type="button" class="mode-btn{% if is_owner or is_paid %} active{% endif %}" id="fullModeBtn" onclick="setAnalysisDepth('full')">
+                        <button type="button" class="mode-btn" id="lightModeBtn" onclick="setAnalysisDepth('light')">⚡ Light (Fast)</button>
+                        <button type="button" class="mode-btn" id="fullModeBtn" onclick="setAnalysisDepth('full')">
                             🔬 Full (744 Concepts)
                             {% if not is_owner and not is_paid %}
                             <span style="font-size: 0.6rem; color: #ffd700;">🔒 PRO</span>
@@ -2859,56 +2859,64 @@
         const userTier = '{{ user.tier if user else "free" }}';
         const userEmail = '{{ user.email if user else "" }}';
         const isOwner = userEmail.toLowerCase().includes('vanndom300');
-        const canUseFullMode = isOwner || (userTier === 'pro' || userTier === 'premium' || userTier === 'owner');
+        const isPaid = userTier === 'pro' || userTier === 'premium';
+        const canUseFullMode = isOwner || isPaid;
         
-        console.log('[ANALYSIS DEPTH] userTier:', userTier, 'userEmail:', userEmail, 'isOwner:', isOwner, 'canUseFullMode:', canUseFullMode);
+        console.log('[ANALYSIS DEPTH] userTier:', userTier, 'isOwner:', isOwner, 'isPaid:', isPaid, 'canUseFullMode:', canUseFullMode);
         
         function setAnalysisDepth(depth) {
-            console.log('[ANALYSIS DEPTH] Setting depth to:', depth, 'canUseFullMode:', canUseFullMode);
+            const lightBtn = document.getElementById('lightModeBtn');
+            const fullBtn = document.getElementById('fullModeBtn');
             
-            // Check if user can use Full mode
+            console.log('[ANALYSIS DEPTH] Clicked:', depth);
+            
+            // Free users can only use Light mode
             if (depth === 'full' && !canUseFullMode) {
-                alert('🔒 Full (744 Concepts) analysis requires Pro or Premium plan.\n\nUpgrade now to unlock detailed institutional-grade analysis!');
+                alert('🔒 Full (744 Concepts) requires Pro or Premium plan.\n\nUpgrade now!');
                 window.location.href = '/pricing';
                 return;
             }
             
+            // Update lightMode variable
             lightMode = (depth === 'light');
             
-            const lightBtn = document.getElementById('lightModeBtn');
-            const fullBtn = document.getElementById('fullModeBtn');
-            
+            // Update button styles
             if (depth === 'light') {
                 lightBtn.classList.add('active');
                 fullBtn.classList.remove('active');
-                console.log('[ANALYSIS DEPTH] Switched to Light mode');
             } else {
                 lightBtn.classList.remove('active');
                 fullBtn.classList.add('active');
-                console.log('[ANALYSIS DEPTH] Switched to Full mode');
             }
+            
+            console.log('[ANALYSIS DEPTH] Now using:', depth, 'lightMode:', lightMode);
         }
         
-        // Initialize: Owner/Pro/Premium can use Full mode, Free users use Light mode
-        // But allow owner to switch between modes freely
-        document.addEventListener('DOMContentLoaded', function() {
+        // Initialize on page load
+        (function initAnalysisDepth() {
             const lightBtn = document.getElementById('lightModeBtn');
             const fullBtn = document.getElementById('fullModeBtn');
             
-            if (canUseFullMode) {
-                // Default to Full mode for paid users and owner
-                lightMode = false;
-                if (lightBtn) lightBtn.classList.remove('active');
-                if (fullBtn) fullBtn.classList.add('active');
-                console.log('[ANALYSIS DEPTH] Initialized to Full mode (owner/paid user)');
-            } else {
-                // Free users default to Light mode
-                lightMode = true;
-                if (lightBtn) lightBtn.classList.add('active');
-                if (fullBtn) fullBtn.classList.remove('active');
-                console.log('[ANALYSIS DEPTH] Initialized to Light mode (free user)');
+            if (!lightBtn || !fullBtn) {
+                console.log('[ANALYSIS DEPTH] Buttons not found, retrying...');
+                setTimeout(initAnalysisDepth, 100);
+                return;
             }
-        });
+            
+            if (canUseFullMode) {
+                // Owner/Pro/Premium: default to Full mode
+                lightMode = false;
+                lightBtn.classList.remove('active');
+                fullBtn.classList.add('active');
+            } else {
+                // Free users: Light mode only
+                lightMode = true;
+                lightBtn.classList.add('active');
+                fullBtn.classList.remove('active');
+            }
+            
+            console.log('[ANALYSIS DEPTH] Initialized. canUseFullMode:', canUseFullMode, 'lightMode:', lightMode);
+        })();
         
         // ========== CUSTOM SYMBOL HANDLER ==========
         function handleSymbolChange() {
