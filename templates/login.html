@@ -315,6 +315,7 @@
                 <div class="divider"><span>or sign in with email</span></div>
                 
                 <form action="/auth/login" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="form-group">
                         <label>Email</label>
                         <input type="email" name="email" placeholder="your@email.com" required>
@@ -343,6 +344,7 @@
                 <div class="divider"><span>or create account with email</span></div>
                 
                 <form action="/auth/register" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="form-group">
                         <label>Full Name</label>
                         <input type="text" name="name" placeholder="John Doe" required>

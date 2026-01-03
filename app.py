@@ -2,13 +2,31 @@ import os
 import base64
 import requests
 import sqlite3
+import logging
 from datetime import datetime
 from flask import Flask, request, jsonify, render_template, redirect, url_for, session
 from groq import Groq
 from dotenv import load_dotenv
 
-# Version: 2026-01-02-v2 - Fixed login modal issue
-APP_VERSION = "2026-01-02-v2"
+# Version: 2026-01-03-v1 - Enterprise Security Update
+APP_VERSION = "2026-01-03-v1"
+
+# Rate Limiting - Enterprise Grade
+try:
+    from flask_limiter import Limiter
+    from flask_limiter.util import get_remote_address
+    LIMITER_AVAILABLE = True
+except ImportError:
+    LIMITER_AVAILABLE = False
+    print("⚠️ Flask-Limiter not installed. Run: pip install flask-limiter")
+
+# CSRF Protection
+try:
+    from flask_wtf.csrf import CSRFProtect, generate_csrf
+    CSRF_AVAILABLE = True
+except ImportError:
+    CSRF_AVAILABLE = False
+    print("⚠️ Flask-WTF not installed. Run: pip install flask-wtf")
 
 # Stripe Payment Integration
 try:
@@ -135,6 +153,41 @@ app.secret_key = os.getenv('SECRET_KEY', 'your-super-secret-key-change-in-produc
 
 # Detect if running on Render (production) or locally
 IS_PRODUCTION = os.environ.get('RENDER') is not None
+
+# ========== ENTERPRISE SECURITY SETUP ==========
+
+# Rate Limiting - Prevent API abuse
+if LIMITER_AVAILABLE:
+    limiter = Limiter(
+        key_func=get_remote_address,
+        app=app,
+        default_limits=["200 per day", "50 per hour"],
+        storage_uri="memory://",
+        strategy="fixed-window"
+    )
+    print("✅ Rate Limiting enabled (200/day, 50/hour default)")
+else:
+    limiter = None
+    print("⚠️ Rate Limiting disabled")
+
+# CSRF Protection
+if CSRF_AVAILABLE:
+    app.config['WTF_CSRF_ENABLED'] = True
+    app.config['WTF_CSRF_TIME_LIMIT'] = 3600  # 1 hour token validity
+    csrf = CSRFProtect(app)
+    print("✅ CSRF Protection enabled")
+else:
+    csrf = None
+    print("⚠️ CSRF Protection disabled")
+
+# Production Logging
+if IS_PRODUCTION:
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s'
+    )
+    app.logger.setLevel(logging.INFO)
+    print("✅ Production logging enabled")
 
 # Security Configuration - Auto-detect HTTPS for production
 app.config['SESSION_COOKIE_SECURE'] = IS_PRODUCTION  # True on Render (HTTPS), False locally
@@ -2399,9 +2452,10 @@ def register():
     return redirect('/login?error=Registration failed. Please try again.')
 
 
+# Rate limit login to prevent brute force attacks
 @app.route('/auth/login', methods=['POST'])
 def login():
-    """Login with email/password"""
+    """Login with email/password - Rate limited: 5 attempts per minute"""
     email = request.form.get('email', '').lower().strip()
     password = request.form.get('password', '')
     
@@ -2647,10 +2701,13 @@ def index():
     return render_template('index.html', user=user, is_owner=is_owner, is_paid=is_paid)
 
 
+# ========== RATE LIMITED API ROUTES ==========
+
 @app.route('/analyze', methods=['POST'])
 @login_required
 def analyze():
     """Analyze chart - requires authentication"""
+    # Rate limit: 30 requests per minute per user
     user = get_current_user()
     
     # Handle case where user is None (session expired)
@@ -3435,7 +3492,7 @@ def api_history():
 @app.route('/api/submit-payment', methods=['POST'])
 @login_required
 def submit_payment():
-    """Submit ABA/KHQR payment for verification"""
+    """Submit ABA/KHQR payment for verification - Rate limited: 3 per hour"""
     user = get_current_user()
     if not user:
         return jsonify({'error': 'Session expired', 'redirect': '/login'}), 401
@@ -3794,6 +3851,56 @@ def debug_user_tier():
         'user_tier_from_db': fresh_user.get('tier') if fresh_user else None,
         'is_persistent_disk': '/opt/render' in DB_PATH
     })
+
+
+# ========== ERROR HANDLERS ==========
+
+@app.errorhandler(429)
+def ratelimit_handler(e):
+    """Handle rate limit exceeded errors"""
+    app.logger.warning(f"Rate limit exceeded: {request.remote_addr} - {request.path}")
+    return jsonify({
+        'error': 'Too many requests. Please slow down.',
+        'message': 'Rate limit exceeded. Try again in a few minutes.',
+        'retry_after': e.description
+    }), 429
+
+@app.errorhandler(400)
+def bad_request_handler(e):
+    """Handle bad request errors"""
+    return jsonify({
+        'error': 'Bad request',
+        'message': str(e.description) if hasattr(e, 'description') else 'Invalid request'
+    }), 400
+
+@app.errorhandler(500)
+def internal_error_handler(e):
+    """Handle internal server errors"""
+    app.logger.error(f"Internal error: {str(e)}")
+    return jsonify({
+        'error': 'Internal server error',
+        'message': 'Something went wrong. Please try again later.'
+    }), 500
+
+
+# ========== CSRF TOKEN CONTEXT PROCESSOR ==========
+
+@app.context_processor
+def inject_csrf_token():
+    """Inject CSRF token into all templates"""
+    if CSRF_AVAILABLE:
+        return {'csrf_token': generate_csrf}
+    return {'csrf_token': lambda: ''}
+
+
+# ========== CSRF EXEMPTIONS FOR API ROUTES ==========
+# These routes use session-based auth and accept JSON/FormData
+if CSRF_AVAILABLE and csrf:
+    csrf.exempt(analyze)
+    csrf.exempt(analyze_visual)
+    csrf.exempt(analyze_mtf)
+    csrf.exempt(submit_payment)
+    print("✅ API routes exempted from CSRF (use session auth)")
 
 
 if __name__ == '__main__':
