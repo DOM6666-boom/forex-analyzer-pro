@@ -1994,11 +1994,18 @@ MASTER_PROMPT = """You are a MASTER TRADER. Analyze this chart and give a CLEAR,
 
 ---
 
-## ⚠️ IMPORTANT RULES:
-1. READ EXACT PRICES from the Y-axis
-2. For BUY trades: SL must be BELOW Entry
-3. For SELL trades: SL must be ABOVE Entry
-4. Keep explanations SIMPLE and CLEAR
+## ⚠️ CRITICAL PRICE READING RULES:
+1. **READ EXACT PRICES FROM Y-AXIS** - Look at the right side of the chart for price scale
+2. **Current Price** - Read the LAST candle's close price from Y-axis
+3. **For BTC/Crypto:** Prices are 5-digit numbers (e.g., 89704, 95000)
+4. **For Gold XAU/USD:** Prices are 4-digit numbers (e.g., 2650.50)
+5. **For Forex pairs:** Prices have 5 decimals (e.g., 1.08500)
+6. **NEVER GUESS** - If you can't read clearly, say "unclear"
+
+## ⚠️ TRADE RULES:
+- For BUY trades: SL must be BELOW Entry, TP must be ABOVE Entry
+- For SELL trades: SL must be ABOVE Entry, TP must be BELOW Entry
+- Keep explanations SIMPLE and CLEAR
 
 ---
 
@@ -2011,18 +2018,18 @@ MASTER_PROMPT = """You are a MASTER TRADER. Analyze this chart and give a CLEAR,
 
 ### 📈 WHAT I SEE (Simple Explanation)
 - **Trend:** [Uptrend/Downtrend/Sideways] 
-- **Current Price:** [Read from chart]
+- **Current Price:** [READ EXACT PRICE FROM Y-AXIS - this is the most important!]
 - **Key Observation:** [1-2 sentences - what's the main thing happening?]
 
 ### 🔑 KEY LEVELS
 | Level | Price | Why Important |
 |-------|-------|---------------|
-| Resistance | [price] | [brief reason] |
-| Support | [price] | [brief reason] |
+| Resistance | [READ FROM Y-AXIS] | [brief reason] |
+| Support | [READ FROM Y-AXIS] | [brief reason] |
 
 ### 💰 TRADE PLAN
 ```
-📍 ENTRY: [price]
+📍 ENTRY: [price based on current price you read]
    → Reason: [1 sentence]
 
 🛑 STOP LOSS: [price]  
@@ -2188,19 +2195,25 @@ def analyze_chart(image_data, symbol="XAU/USD", interval="1h", light_mode=False,
         detect_prompt = """Look at this trading chart image and identify:
 1. **SYMBOL**: What trading instrument is shown? (e.g., XAUUSD, EURUSD, BTCUSD, US30, etc.)
 2. **TIMEFRAME**: What timeframe is the chart? (e.g., M1, M5, M15, M30, H1, H4, D1, W1, MN)
+3. **CURRENT PRICE**: Read the EXACT current price from the Y-axis (right side of chart)
 
 Look for:
 - Symbol name in the chart title, corner, or header
 - Timeframe indicator (usually near the symbol or in chart settings)
-- Price range to help identify the instrument (Gold ~2600-2700, EURUSD ~1.0-1.1, etc.)
+- Price range to help identify the instrument:
+  * BTC/Crypto: 5-digit numbers (80000-100000)
+  * Gold XAU/USD: 4-digit numbers (2600-2700)
+  * Forex pairs: 5 decimals (1.08500)
 
 Respond in this EXACT format only:
 SYMBOL: [detected symbol]
 TIMEFRAME: [detected timeframe]
+CURRENT_PRICE: [exact price from Y-axis]
 
 If you cannot detect, use:
 SYMBOL: XAU/USD
-TIMEFRAME: H1"""
+TIMEFRAME: H1
+CURRENT_PRICE: 0"""
         
         try:
             detect_response = call_groq_with_fallback(
@@ -2211,7 +2224,7 @@ TIMEFRAME: H1"""
                         {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
                     ]
                 }],
-                max_tokens=100,
+                max_tokens=150,
                 temperature=0.1,
                 has_images=True,
                 image_base64=base64_image
@@ -2224,6 +2237,12 @@ TIMEFRAME: H1"""
             import re
             symbol_match = re.search(r'SYMBOL:\s*([A-Za-z0-9/\-]+)', detect_text)
             timeframe_match = re.search(r'TIMEFRAME:\s*([A-Za-z0-9]+)', detect_text)
+            price_match = re.search(r'CURRENT_PRICE:\s*([\d.]+)', detect_text)
+            
+            detected_price = 0
+            if price_match:
+                detected_price = float(price_match.group(1))
+                print(f"[AUTO-DETECT] Detected price: {detected_price}")
             
             if symbol_match:
                 detected_symbol = symbol_match.group(1).upper().strip()
@@ -2261,7 +2280,7 @@ TIMEFRAME: H1"""
                 }
                 interval = tf_map.get(detected_tf, '1h')
             
-            print(f"[AUTO-DETECT] Final: Symbol={symbol}, Interval={interval}")
+            print(f"[AUTO-DETECT] Final: Symbol={symbol}, Interval={interval}, Price={detected_price}")
             
         except Exception as e:
             print(f"[AUTO-DETECT] Error: {e}, using defaults")
